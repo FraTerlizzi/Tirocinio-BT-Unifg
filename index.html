@@ -89,9 +89,25 @@ nav button[aria-current="page"]{color:var(--accent);border-bottom-color:var(--ac
 main{min-width:0;padding-block:22px 64px}
 .wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:22px;width:100%}
 .top{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:flex-end;justify-content:space-between}
-.crumb{font-size:.88rem;color:var(--muted)}
-.crumb b{color:var(--accent);font-weight:600}
-.period{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.86rem}
+.more summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:.9rem;margin-top:8px}
+.anni-box{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.slim-r{display:flex;align-items:center;gap:14px}
+.slim-demo{opacity:.85}
+.section-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.section-tabs button{border:0;background:none;padding:10px 14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.section-tabs button[aria-pressed="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.todo{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.todo li{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.todo li:first-child{border-top:0;padding-top:0}
+.todo .t{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.tile.click{cursor:pointer;text-align:left;border-left:0;border-right:0;border-bottom:0;font:inherit;color:inherit}
+.tile.click:hover{box-shadow:0 2px 4px rgb(28 39 51 / .06),0 10px 24px rgb(28 39 51 / .1)}
+.search{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.search input{flex:1;min-width:180px;padding:8px 12px;border-radius:6px;border:1px solid var(--line);background:var(--surface)}
+.dsec{display:flex;flex-direction:column;gap:8px;padding-top:14px;border-top:1px solid var(--line)}
+.dsec h3{font-size:.95rem;color:var(--brand)}
+.action-card{display:flex;justify-content:space-between;align-items:center;gap:14px 24px;flex-wrap:wrap;border-top:3px solid var(--accent)}
+.action-card .state{font-family:var(--f-head);font-size:1.35rem;font-weight:700}
 .pill{display:inline-flex;padding:3px 10px;border-radius:4px;font-weight:600}
 .pill.per{background:var(--surface);border:1px solid var(--line);color:var(--muted)}
 .pill.demo{background:var(--warn-soft);color:var(--warn)}
@@ -323,7 +339,7 @@ td select,.field input,.field select,.field textarea{padding:8px 10px;border-rad
 
 <div class="slim"><div class="in">
   <span class="crumbs">Corso di Laurea in Infermieristica<span>›</span>Tirocini clinici</span>
-  <button class="slimlink" data-action="guida">Guida</button>
+  <span class="slim-r"><span class="slim-demo">Versione dimostrativa · dati di esempio</span><button class="slimlink" data-action="guida">Guida</button></span>
 </div></div>
 <header class="head"><div class="in">
   <div class="brand">
@@ -336,12 +352,8 @@ td select,.field input,.field select,.field textarea{padding:8px 10px;border-rad
 <main><div class="in">
   <div class="wrap">
     <header class="top">
-      <div><p class="crumb" id="eyebrow"></p><h1 id="title"></h1></div>
-      <div class="period">
-        <div class="filters" id="anni" role="group" aria-label="Anno di corso"></div>
-        <span class="pill per" id="period"></span>
-        <span class="pill demo">Demo · dati di esempio</span>
-      </div>
+      <div><h1 id="title"></h1><p class="muted small" id="period" style="margin-top:2px"></p></div>
+      <div class="anni-box" id="anni-box"><span class="label">Anno di corso</span><div class="mode" id="anni" role="group" aria-label="Anno di corso"></div></div>
     </header>
     <div id="view" class="wrap"></div>
   </div>
@@ -590,11 +602,13 @@ const I = {
   route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h8a3 3 0 0 0 0-6H8a3 3 0 0 1 0-6h8"/>',
   cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'
 };
+// Menu corti: etichette di una o due parole. "Idee e sviluppi" resta raggiungibile dal fondo della Panoramica.
 const NAV = {
-  coord:[["panoramica","Panoramica","grid"],["assegnazione","Assegnazione","sliders"],["calendario","Calendario","cal"],["studenti","Studenti","people"],["reparti","Reparti","hosp"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"],["idee","Idee e sviluppi","idea"]],
+  coord:[["panoramica","Panoramica","grid"],["assegnazione","Assegnazione","sliders"],["presenze","Presenze","qr"],["studenti","Studenti","people"],["reparti","Reparti","hosp"],["calendario","Calendario","cal"],["messaggi","Messaggi","chat"]],
   caposala:[["qr","QR presenze","qr"]],
-  stud:[["home","La mia assegnazione","home"],["percorso","Il mio percorso","route"],["preferenze","Le mie preferenze","hosp"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"]]
+  stud:[["home","Home","home"],["presenze","Presenze","qr"],["percorso","Percorso","route"],["preferenze","Preferenze","hosp"],["messaggi","Messaggi","chat"]]
 };
+const TITOLI = {idee:"Idee e sviluppi", home:"La mia assegnazione", percorso:"Il mio percorso", preferenze:"Le mie preferenze"};
 
 // ================= Viste coordinatore =================
 const C = {};
@@ -605,40 +619,43 @@ C.panoramica = () => {
   const oggi = A.filter(a=>a.d===TODAY && ids.has(a.sid));
   const lastDay = PAST[PAST.length-1];
   const nBlocc = attivi.filter(s=>!reqOk(s)).length, nCal = PERIODI.filter(p=>controlliPeriodo(p).length).length;
-  const alerts = [
-    ...(nCal ? [`<b>${nCal} periodi di tirocinio</b> non rispettano le regole (durata o sessioni d'esame). <button class="linkbtn" data-go="calendario">Apri Calendario</button>`] : []),
-    ...(nBlocc ? [`<b>${nBlocc} studenti non assegnabili</b>: mancano visita, corso sicurezza o laboratori. <button class="linkbtn" data-go="studenti">Apri Studenti</button>`] : []),
-    ...ok.filter(r=>r.f.done).map(r=>`<b>${esc(r.s.n)}</b> ripete ${esc(r.w.a)}.`),
-    ...ok.filter(r=>r.f.d>30).map(r=>`<b>${esc(r.s.n)}</b>: reparto a ${r.f.d} km da casa (${esc(r.s.com)} → ${esc(H[r.w.h].n)}).`),
-    ...R.filter(r=>!r.w).map(r=>`<b>${esc(r.s.n)}</b> non ha un reparto: aumentare i posti o assegnare a mano.`),
-    ...A.filter(a=>!a.out&&a.d<TODAY&&ids.has(a.sid)).map(a=>`<b>${esc(student(a.sid)?.n)}</b> non ha registrato l'uscita il ${fmtDay(a.d)}.`),
-    ...(lastDay ? attivi.filter(s=>!rec(s.id,lastDay)).map(s=>`<b>${esc(s.n)}</b> assente ${fmtDay(lastDay)}.`) : [])
-  ];
+  const u = used(R), casi = R.filter(r=>!r.blocked && issues(r,u).length).length;
+  const pub = st.pub[st.anno], pubOk = pub && pub.sig === sig();
+  const usciteMancanti = A.filter(a=>!a.out && a.d<TODAY && ids.has(a.sid)).length;
+  const assentiIeri = lastDay ? attivi.filter(s=>!rec(s.id,lastDay)).length : 0;
+  // Elenco di cose da fare: ogni riga dice cosa succede e porta dove si risolve
+  const n = (x, uno, tanti) => `<b>${x} ${x===1 ? uno : tanti}</b>`;
+  const todo = [
+    nCal && [`${n(nCal,"periodo","periodi")} del calendario non rispetta${nCal===1?"":"no"} le regole (durata o esami).`, "Correggi", "calendario"],
+    nBlocc && [`${n(nBlocc,"studente","studenti")} del ${ANNI[st.anno].label} senza requisiti: non ${nBlocc===1?"può":"possono"} essere ${nBlocc===1?"assegnato":"assegnati"}.`, "Segna i requisiti", "studenti", "req"],
+    !pubOk && ok.length && [`L'assegnazione del ${ANNI[st.anno].label} ${pub ? "ha modifiche non pubblicate" : "non è ancora pubblicata"}: gli studenti non la vedono.`, "Vai all'assegnazione", "assegnazione"],
+    casi && [`${n(casi,"caso","casi")} nella proposta di assegnazione da controllare (ripetizioni, distanza, posti).`, "Rivedi i casi", "assegnazione", "check"],
+    usciteMancanti && [`${n(usciteMancanti,"uscita","uscite")} non registrat${usciteMancanti===1?"a":"e"} nei giorni scorsi.`, "Apri il registro", "presenze"],
+    assentiIeri && [`${n(assentiIeri,"studente assente","studenti assenti")} ${fmtDay(lastDay)}.`, "Apri il registro", "presenze"],
+    unread() && [`${n(unread(),"messaggio","messaggi")} degli studenti da leggere.`, "Leggi", "messaggi"]
+  ].filter(Boolean);
   const nonArrivati = attivi.filter(s=>!rec(s.id,TODAY));
+  const tile = (v,l,s,go) => `<button class="tile click" data-go="${go}"><span class="label">${l}</span><span class="v num">${v}</span><span class="s">${s}</span></button>`;
   return `
-  <section class="hero-band">
-    <div><h2>Buongiorno, Michele</h2><p>${ANNI[st.anno].label}: ${Y.length} studenti${Y.length-attivi.length?`, di cui ${Y.length-attivi.length} in Erasmus`:""}. Periodo ${PERIODO} in ${WARDS.length} reparti tra Barletta, Andria e Bisceglie. Oggi ${oggi.length} su ${attivi.length} hanno già timbrato l'entrata.</p></div>
-    <div class="btn-row"><button class="btn" data-go="assegnazione">Vai all'assegnazione</button><button class="btn ghost" data-go="presenze">Presenze di oggi</button></div>
-  </section>
-  ${quick([["assegnazione","sliders","Assegnazione reparti","Automatica o manuale, in 3 passi."],["presenze","qr","Presenze tirocinio","Registro con entrate e uscite via QR."],
-           ["studenti","people","Studenti","Aggiungi e modifica dati e percorsi."],["messaggi","chat","Messaggi",unread()?`${unread()} da leggere.`:"Nessun messaggio nuovo."]])}
+  <p class="muted" style="margin-top:-8px">Buongiorno, Michele. Ecco come va il ${ANNI[st.anno].label}: ${Y.length} studenti${Y.length-attivi.length?`, ${Y.length-attivi.length} in Erasmus`:""}.</p>
   <div class="tiles">
-    ${[[Y.length,"Studenti",`${ANNI[st.anno].label}, periodo 1`],
-       [`${oggi.length}/${attivi.length}`,"In reparto oggi",`timbrature QR di ${fmtDay(TODAY,{weekday:"long",day:"numeric",month:"long"})}`],
-       [`${attivi.filter(reqOk).length}/${attivi.length}`,"Requisiti completi",`visita, sicurezza, laboratori · ${nuovi} in un reparto nuovo`],
-       [unread(),"Messaggi da leggere","dagli studenti"]]
-      .map(([v,l,s])=>`<div class="tile"><span class="label">${l}</span><span class="v num">${v}</span><span class="s">${s}</span></div>`).join("")}
+    ${tile(`${oggi.length}/${attivi.length}`,"In reparto oggi","timbrature con il QR","presenze")}
+    ${tile(`${attivi.filter(reqOk).length}/${attivi.length}`,"Requisiti completi","visita, sicurezza, laboratori","studenti")}
+    ${tile(pubOk ? "Pubblicata" : pub ? "Da aggiornare" : "Da pubblicare","Assegnazione",`${ok.length} studenti con reparto · ${nuovi} in reparti nuovi`,"assegnazione")}
+    ${tile(unread(),"Messaggi da leggere","dagli studenti","messaggi")}
   </div>
   <div class="grid2">
-    <div class="card"><div class="card-h"><h2>Da controllare</h2><span class="muted small">${alerts.length} segnalazioni</span></div>
-      <ul class="alerts">${alerts.length ? alerts.slice(0,8).map(t=>`<li><span class="dot"></span><span>${t}</span></li>`).join("") + (alerts.length>8?`<li class="muted">… e altre ${alerts.length-8}</li>`:"") : `<li><span class="dot ok"></span><span>Nessuna criticità.</span></li>`}</ul></div>
-    <div class="card"><div class="card-h"><h2>Non ancora in reparto oggi <span class="muted num small">(${nonArrivati.length})</span></h2><button class="btn ghost sm" data-go="presenze">Registro completo</button></div>
+    <div class="card"><div class="card-h"><h2>Da fare</h2><span class="muted small">${todo.length ? `${todo.length} cose` : ""}</span></div>
+      <ul class="todo">${todo.map(([t,b,go,filtro])=>`<li><span class="t"><span class="dot"></span><span>${t}</span></span><button class="btn ghost sm" data-action="vai" data-go-to="${go}" ${filtro?`data-filtro="${filtro}"`:""}>${b}</button></li>`).join("")
+        || `<li><span class="t"><span class="dot ok"></span><span>Tutto in ordine: non c'è niente da sistemare.</span></span></li>`}</ul></div>
+    <div class="card"><div class="card-h"><h2>Non ancora in reparto oggi <span class="muted num small">(${nonArrivati.length})</span></h2></div>
       <div class="tbl-wrap"><table><tbody>
-      ${nonArrivati.slice(0,12).map(s=>{const r=ok.find(x=>x.s===s);
-        return `<tr><td><b style="font-weight:600">${esc(s.n)}</b></td><td class="small muted">${r?esc(r.w.a):"—"}</td></tr>`}).join("") || `<tr><td class="muted">Tutti presenti.</td></tr>`}
-      ${nonArrivati.length>12?`<tr><td class="muted small" colspan="2">… e altri ${nonArrivati.length-12}: vedi il registro completo.</td></tr>`:""}
-      </tbody></table></div></div>
-  </div>`;
+      ${nonArrivati.slice(0,10).map(s=>{const r=ok.find(x=>x.s===s);
+        return `<tr><td><b style="font-weight:600">${esc(s.n)}</b></td><td class="small muted">${r?esc(r.w.a):"senza reparto"}</td></tr>`}).join("") || `<tr><td class="muted">Tutti presenti.</td></tr>`}
+      </tbody></table></div>
+      ${nonArrivati.length>10?`<p class="small muted" style="margin-top:10px">… e altri ${nonArrivati.length-10}. <button class="linkbtn" data-go="presenze">Vedi il registro completo</button></p>`:""}</div>
+  </div>
+  <p class="small"><button class="linkbtn" data-go="idee">Idee e sviluppi futuri del progetto →</button></p>`;
 };
 
 // ---- Assegnazione: 1 Metodo → 2 Criteri → 3 Revisione e pubblicazione ----
@@ -678,13 +695,14 @@ function stepCriteria(){
   return `<div class="crit">
     <div class="card">
       <fieldset class="q"><legend>Come viene scelto il reparto</legend>
-        <p class="muted small">L'ordine dei criteri è quello delle linee guida nazionali (Conferenza Permanente delle Professioni Sanitarie, 2025) e non si modifica.</p>
+        <p class="muted small">Requisiti → bisogni di apprendimento → posti → preferenze. È l'ordine delle linee guida nazionali (Consensus 2025) e non si modifica.</p>
+        <details class="more"><summary>Leggi i dettagli dei 4 criteri</summary>
         <ol class="steps" style="margin-top:14px">
           <li><span><b>Requisiti obbligatori</b>Visita di sorveglianza sanitaria, corso sicurezza e laboratori propedeutici. Chi non li ha non viene assegnato.</span></li>
           <li><span><b>Bisogni di apprendimento e complessità crescente</b>Prima un reparto mai frequentato, poi la complessità adatta all'anno (I anno solo livello 1, II fino al 2, III fino al 3, con priorità all'area critica; a mano puoi assegnare anche l'area critica a chiunque) e un contesto nuovo. Sceglie per primo chi ha più reparti ancora da fare.</span></li>
           <li><span><b>Posti e Guide disponibili</b>Ogni Guida segue al massimo 2 studenti.</span></li>
           <li><span><b>Preferenze dello studente</b>Fino a 3 scelte tra ospedali e reparti, la distanza da casa e chi non ha l'auto. Contano sempre meno dei bisogni di apprendimento.</span></li>
-        </ol>
+        </ol></details>
       </fieldset>
       <fieldset class="q"><legend>Cosa puoi regolare</legend>
         <div class="lvl-row"><span id="lv-pref-l">Quanto contano le preferenze dello studente</span><div class="lvl" role="radiogroup" aria-labelledby="lv-pref-l">${LEVELS.map(([v,t])=>`<label><input type="radio" name="lv-pref" value="${v}" ${st.W.pref===v?"checked":""}><span>${t}</span></label>`).join("")}</div></div>
@@ -772,22 +790,25 @@ function stepReview(){
 
 C.studenti = () => {
   const R = assignment(), Y = SY(), daSegnare = Y.filter(s=>!s.erasmus && !reqOk(s)).length;
-  if (!Y.some(s=>s.id===st.sel)) st.sel = Y[0]?.id;
+  const q = (st.q||"").trim().toLowerCase(), f = st.sfilt || "all";
+  const FILTRI = {all:["Tutti", ()=>true], req:["Requisiti mancanti", s=>!s.erasmus && !reqOk(s)], senza:["Senza reparto", s=>!s.erasmus && !R.find(x=>x.s===s)?.w], dati:["Dati da completare", s=>s.media==null || !s.com]};
+  const L = Y.filter(s => FILTRI[f][1](s) && (!q || s.n.toLowerCase().includes(q) || (s.m||"").toLowerCase().includes(q)));
+  if (!L.some(s=>s.id===st.sel)) st.sel = L[0]?.id || Y[0]?.id;
   return `<div class="stud">
     <div class="card">
-      <div class="card-h"><h2>Studenti del ${ANNI[st.anno].label} <span class="muted num small">(${Y.length})</span></h2><button class="btn" data-action="new-stud">+ Aggiungi studente</button></div>
+      <div class="card-h"><h2>${Y.length} studenti</h2><button class="btn" data-action="new-stud">+ Aggiungi studente</button></div>
       ${daSegnare ? `<div class="why" style="margin-bottom:12px">${st.confirmReq
         ? `<span><b>Segnare visita, corso sicurezza e laboratori come completi per tutti i ${daSegnare} studenti che hanno requisiti mancanti?</b> Fallo solo dopo aver controllato la documentazione.</span><div class="btn-row"><button class="btn sm" data-action="req-all">Sì, segna completi</button><button class="btn ghost sm" data-action="req-all-no">Annulla</button></div>`
-        : `<span><b>${daSegnare} studenti</b> hanno requisiti mancanti o da verificare e non possono essere assegnati. Puoi spuntarli uno per uno nella scheda a destra.</span><div><button class="btn ghost sm" data-action="req-all-ask">Segna completi per tutti</button></div>`}</div>` : ""}
-      <div class="tbl-wrap"><table><thead><tr><th>Studente</th><th>Requisiti</th><th>Media</th><th>Domicilio</th><th>Reparti svolti</th><th>Reparto attuale</th><th>Ore anno</th></tr></thead><tbody>
-      ${Y.map(s=>{const r=R.find(x=>x.s===s), o=oreAnno(s), mr=reqMancanti(s).length;
+        : `<span><b>${daSegnare} studenti</b> hanno requisiti mancanti o da verificare: finché non li segni non vengono assegnati.</span><div><button class="btn ghost sm" data-action="req-all-ask">Segna completi per tutti</button></div>`}</div>` : ""}
+      <div class="search"><input id="q-stud" type="search" placeholder="Cerca per cognome o matricola…" value="${esc(st.q||"")}" aria-label="Cerca studente" autocomplete="off"></div>
+      <div class="filters" style="margin-bottom:10px" role="group" aria-label="Mostra">${Object.entries(FILTRI).map(([k,[l,fn]])=>`<button data-action="sfilt" data-v="${k}" aria-pressed="${k===f}">${l} · ${Y.filter(fn).length}</button>`).join("")}</div>
+      <div class="tbl-wrap"><table><thead><tr><th>Studente</th><th>Requisiti</th><th>Reparto attuale</th><th>Ore</th></tr></thead><tbody>
+      ${L.map(s=>{const r=R.find(x=>x.s===s), mr=reqMancanti(s).length;
         return `<tr class="click ${s.id===st.sel?"sel":""}" data-action="sel-stud" data-sid="${s.id}" tabindex="0">
         <td class="who"><b>${esc(s.n)}</b><small class="num">${esc(s.m||"matricola —")}</small></td>
-        <td>${mr ? `<span class="chip bad">${mr===3?"Da verificare":`Manca${mr>1?"no":""} ${mr}`}</span>` : `<span class="chip ok">Completi</span>`}</td>
-        <td class="num">${fmtMedia(s)}</td><td>${esc(s.com||"—")}</td>
-        <td><div class="chips">${s.hist.map(([a])=>chip(a)).join("")||'<span class="muted">—</span>'}</div>${s.hist.length?`<small class="muted num">livelli ${livelli(s)}</small>`:""}</td>
+        <td>${s.erasmus ? `<span class="chip good">Erasmus</span>` : mr ? `<span class="chip bad">${mr===3?"Da verificare":`Manca${mr>1?"no":""} ${mr}`}</span>` : `<span class="chip ok">Completi</span>`}</td>
         <td>${r?.w?chip(r.w.a):'<span class="muted">—</span>'}</td>
-        <td class="num">${oreTxt(s)}<br><span class="chip ${o.c}">${o.txt}</span></td></tr>`}).join("")}
+        <td class="num">${oreTxt(s)}</td></tr>`}).join("") || `<tr><td colspan="4" class="muted">Nessuno studente corrisponde alla ricerca.</td></tr>`}
       </tbody></table></div>
     </div>
     ${st.editing ? studForm() : studDetail(st.sel, true)}
@@ -796,30 +817,36 @@ C.studenti = () => {
 function studDetail(sid, coord){
   const s = student(sid), r = mine(sid) || {rank:"—"}, sm = summary(sid), o = oreAnno(s), lab = ANNI[s.anno].label;
   const missA = AREAS.filter(a=>!s.hist.some(h=>h[0]===a)), missH = Object.keys(H).filter(h=>!s.hist.some(x=>x[1]===h));
+  // Scheda divisa in sezioni con un titolo ciascuna: requisiti, tirocinio attuale, dati, percorso, ore
   return `<div class="card detail">
-    <div class="card-h" style="margin:0;align-items:flex-start"><div><p class="label">Percorso di tirocinio</p><h2 style="margin-top:2px">${esc(s.n)}</h2><p class="muted num small">${lab} · ${esc(s.m||"matricola —")} · media ${fmtMedia(s)}${s.media!=null?"/30":""}</p></div>
+    <div class="card-h" style="margin:0;align-items:flex-start"><div><h2>${esc(s.n)}</h2><p class="muted num small">${lab} · ${esc(s.m||"matricola —")}</p></div>
       ${coord?`<button class="btn ghost sm" data-action="edit-stud" data-sid="${s.id}">Modifica dati</button>`:""}</div>
-    ${s.media==null||!s.com ? `<p class="small chip bad" style="white-space:normal">Dati da completare: ${[s.media==null&&"media",!s.com&&"domicilio",!s.hist.length&&s.anno>1&&"tirocini svolti"].filter(Boolean).join(", ")}.</p>` : ""}
-    <fieldset class="q" style="padding:0"><legend style="font-size:1rem">Requisiti per il tirocinio</legend>
+    ${coord && (s.media==null||!s.com) ? `<p class="small chip bad" style="white-space:normal">Da completare: ${[s.media==null&&"media",!s.com&&"domicilio",!s.hist.length&&s.anno>1&&"tirocini svolti"].filter(Boolean).join(", ")}.</p>` : ""}
+    <div class="dsec"><h3>Requisiti</h3>
       <div class="reqs">${REQ.map(([k,l])=>`<label class="req ${s.req[k]?"on":""}"><input type="checkbox" data-req="${s.id}:${k}" ${s.req[k]?"checked":""} ${coord?"":"disabled"}><span>${l}</span></label>`).join("")}</div>
-      <p class="small ${reqOk(s)?"muted":"err"}" style="margin-top:6px">${reqOk(s) ? "Requisiti completi: può essere assegnato." : coord ? "Finché manca un requisito lo studente non viene assegnato." : "Finché manca un requisito non puoi essere assegnato: rivolgiti al coordinatore."}</p>
-    </fieldset>
-    <dl class="kv">
-      <dt>Domicilio</dt><dd>${esc(s.com||"Non indicato")}</dd>
-      <dt>Livelli svolti</dt><dd class="num">${livelli(s)}</dd>
-      <dt>Esperienze nel triennio</dt><dd class="num">${esperienze(s)}</dd>
-      <dt>Ordine di scelta</dt><dd class="num">${s.erasmus?"In Erasmus":r.blocked||!r.rank||r.rank==="—"?"—":`${r.rank}° su ${S.filter(x=>x.anno===s.anno&&!x.erasmus&&reqOk(x)).length}`}</dd>
-      <dt>Preferenze</dt><dd>${s.pref.length ? s.pref.map((p,i)=>`${i+1}. ${esc(prefName(p))}`).join("<br>") : "Nessuna indicata"}${s.noCar?"<br>Senza auto, usa i mezzi pubblici":""}${s.note?`<br><span class="muted">“${esc(s.note)}”</span>`:""}</dd>
-      <dt>Ore nell'anno</dt><dd class="num">${oreTxt(s)} · ${o.txt}</dd>
-      <dt>Presenze periodo</dt><dd class="num">${sm.giorni} turni · ${Math.round(sm.ore)} h su ${ORE_TARGET} h</dd>
-    </dl>
-    <ol class="timeline">
-      ${s.hist.map(([a,h],i)=>`<li><span>${chip(a)}<br><small class="muted">tirocinio ${i+1} · ${H[h].n}</small></span></li>`).join("")}
-      <li class="next"><span>${s.erasmus?`<span class="chip good">Erasmus ${esc(s.erasmus)}</span>`:r.w?chip(r.w.a):'<span class="chip bad">Da assegnare</span>'}<br><small class="muted">${lab} · periodo 1 · ${r.w?H[r.w.h].n:"—"} · in corso</small></span></li>
-    </ol>
-    ${r.w?`<div class="why"><b>Perché questo reparto</b><div class="chips">${reasons(r.f)}</div><span class="muted">Affinità ${Math.round(r.f.score)}/100.</span></div>`:""}
-    <div><p class="label" style="margin-bottom:6px">Reparti ancora da fare</p><div class="chips">${missA.map(a=>chip(a)).join("")||'<span class="muted">Nessuno</span>'}</div></div>
-    <div><p class="label" style="margin-bottom:6px">Ospedali mai frequentati</p><div class="chips">${missH.map(h=>`<span class="chip">${H[h].n}</span>`).join("")||'<span class="muted">Nessuno</span>'}</div></div>
+      <p class="small ${reqOk(s)?"muted":"err"}">${reqOk(s) ? "Completi: può essere assegnato." : coord ? "Finché manca un requisito non viene assegnato." : "Finché manca un requisito non puoi essere assegnato: rivolgiti al coordinatore."}</p>
+    </div>
+    <div class="dsec"><h3>Tirocinio in corso</h3>
+      <p>${s.erasmus?`<span class="chip good">Erasmus ${esc(s.erasmus)}</span>`:r.w?`${chip(r.w.a)} · <span class="muted">${esc(H[r.w.h].n)}</span>`:'<span class="chip bad">Da assegnare</span>'}</p>
+      ${r.w?`<div class="chips">${reasons(r.f)}</div>`:""}
+    </div>
+    <div class="dsec"><h3>Dati e preferenze</h3>
+      <dl class="kv">
+        <dt>Media</dt><dd class="num">${fmtMedia(s)}${s.media!=null?"/30":""}</dd>
+        <dt>Domicilio</dt><dd>${esc(s.com||"Non indicato")}</dd>
+        <dt>Preferenze</dt><dd>${s.pref.length ? s.pref.map((p,i)=>`${i+1}. ${esc(prefName(p))}`).join("<br>") : "Nessuna indicata"}${s.noCar?"<br>Senza auto, usa i mezzi pubblici":""}${s.note?`<br><span class="muted">“${esc(s.note)}”</span>`:""}</dd>
+        <dt>Ordine di scelta</dt><dd class="num">${s.erasmus?"In Erasmus":r.blocked||!r.rank||r.rank==="—"?"—":`${r.rank}° su ${S.filter(x=>x.anno===s.anno&&!x.erasmus&&reqOk(x)).length}`}</dd>
+      </dl>
+    </div>
+    <div class="dsec"><h3>Percorso</h3>
+      <dl class="kv"><dt>Esperienze nel triennio</dt><dd class="num">${esperienze(s)}</dd><dt>Livelli svolti</dt><dd class="num">${livelli(s)}</dd></dl>
+      ${s.hist.length ? `<ol class="timeline" style="margin-top:6px">${s.hist.map(([a,h],i)=>`<li><span>${chip(a)}<br><small class="muted">tirocinio ${i+1} · ${H[h].n}</small></span></li>`).join("")}</ol>` : `<p class="small muted">Nessun tirocinio precedente registrato.</p>`}
+      <p class="label">Reparti ancora da fare</p><div class="chips">${missA.map(a=>chip(a)).join("")||'<span class="muted">Nessuno</span>'}</div>
+      <p class="label">Ospedali mai frequentati</p><div class="chips">${missH.map(h=>`<span class="chip">${H[h].n}</span>`).join("")||'<span class="muted">Nessuno</span>'}</div>
+    </div>
+    <div class="dsec"><h3>Ore</h3>
+      <dl class="kv"><dt>Nell'anno</dt><dd class="num">${oreTxt(s)} · ${o.txt}</dd><dt>In questo periodo</dt><dd class="num">${sm.giorni} turni · ${Math.round(sm.ore)} h su ${ORE_TARGET} h</dd></dl>
+    </div>
   </div>`;
 }
 function studForm(){
@@ -866,8 +893,11 @@ function saveForm(){
   st.editing = null; render(); toast(e.id ? "Dati aggiornati." : `Studente aggiunto: ${n}.`);
 }
 
-C.reparti = () => { const ok = assignment().filter(r=>r.w);
-  return Object.entries(H).map(([id,h])=>`<div class="card">
+C.reparti = () => { const ok = assignment().filter(r=>r.w), sel = st.repH || "H1";
+  // un ospedale alla volta, scelto con le schede: niente pagina lunghissima
+  return `<div class="section-tabs" role="group" aria-label="Ospedale">${Object.entries(H).map(([id,h])=>`<button data-action="rep-h" data-v="${id}" aria-pressed="${id===sel}">${h.city} <span class="muted num">· ${ok.filter(r=>r.w.h===id).length} studenti</span></button>`).join("")}</div>
+  <p class="small muted">Livelli di complessità e posti sono una proposta da confermare. Ogni Guida segue al massimo 2 studenti.</p>` +
+  Object.entries(H).filter(([id])=>id===sel).map(([id,h])=>`<div class="card">
     <div class="card-h"><div><h2>${h.f}</h2><p class="muted small">${h.city} · ${WARDS.filter(w=>w.h===id).length} reparti</p></div><span class="muted num small">${ok.filter(r=>r.w.h===id).length} studenti assegnati</span></div>
     <div class="tbl-wrap"><table><thead><tr><th>Reparto</th><th>Tipo</th><th>Tutor</th><th title="Ogni Guida segue al massimo 2 studenti">Guide</th><th>Posti</th><th>Assegnati · ${ANNI[st.anno].label}</th></tr></thead><tbody>
     ${WARDS.filter(w=>w.h===id).map(w=>{const who = ok.filter(r=>r.w.id===w.id);
@@ -924,7 +954,11 @@ C.presenze = () => {
   const R = assignment(), d = st.day, k = UPTO.indexOf(d);
   const rows = R.map(r=>({r, a:rec(r.s.id,d)}));
   const cnt = l => rows.filter(x=>status(x.a,d)[0]===l).length;
-  return `<div class="grid2">
+  const tab = st.ptab || "reg";
+  const tabs = `<div class="section-tabs" role="group" aria-label="Sezione presenze">${[["reg","Registro del giorno"],["rie","Riepilogo ore"],["qr","QR e come funziona"]].map(([k,l])=>`<button data-action="ptab" data-v="${k}" aria-pressed="${k===tab}">${l}</button>`).join("")}</div>`;
+  if (tab==="reg") return tabs + registro();
+  if (tab==="rie") return tabs + riepilogo();
+  return tabs + `<div class="grid2">
     <div class="card"><div class="card-h"><h2>QR del giorno</h2>
       <select id="qr-ward" aria-label="Reparto" style="padding:6px 8px;border-radius:7px;border:1px solid var(--line);background:var(--surface);max-width:100%">${WARDS.map(w=>`<option value="${w.id}" ${w.id===st.qrWard?"selected":""}>${esc(wardName(w))}</option>`).join("")}</select></div>
       <div class="qr-wrap"><div class="qrbox" id="qr-big"></div>
@@ -940,9 +974,10 @@ C.presenze = () => {
       <li><span><b>Entrata e uscita</b>La prima scansione del giorno registra l'entrata, la seconda l'uscita. Le ore si calcolano da sole.</span></li>
       <li><span><b>Verifica</b>Il coordinatore vede tutto qui per nome. Ritardi e uscite mancanti vengono segnalati e si correggono a mano.</span></li>
     </ol></div>
-  </div>
+  </div>`;
+  function registro(){ return `
   <div class="card">
-    <div class="card-h"><h2>Registro del giorno</h2>
+    <div class="card-h"><h2>${d===TODAY ? "Oggi" : fmtDay(d,{weekday:"long",day:"numeric",month:"long"})}</h2>
       <div class="btn-row"><button class="icon-btn" data-action="day" data-step="-1" ${k<=0?"disabled":""} aria-label="Giorno precedente">‹</button>
         <select id="day" aria-label="Giorno" style="padding:6px 8px;border-radius:7px;border:1px solid var(--line);background:var(--surface)">${UPTO.map(x=>`<option value="${x}" ${x===d?"selected":""}>${fmtDay(x)}${x===TODAY?" (oggi)":""}</option>`).join("")}</select>
         <button class="icon-btn" data-action="day" data-step="1" ${k>=UPTO.length-1?"disabled":""} aria-label="Giorno successivo">›</button></div></div>
@@ -955,10 +990,11 @@ C.presenze = () => {
       <td><div class="chips"><span class="chip ${c}">${l}</span>${a?.via==="manuale"?'<span class="chip">manuale</span>':""}</div></td>
       <td>${!a?`<button class="btn ghost sm" data-action="mark" data-sid="${r.s.id}">Segna presente</button>`:(!a.out&&d<TODAY?`<button class="btn ghost sm" data-action="fix-out" data-sid="${r.s.id}">Inserisci uscita 14:00</button>`:"")}</td></tr>`}).join("")}
     </tbody></table></div>
-  </div>
+  </div>`; }
+  function riepilogo(){ return `
   ${monteOre()}
   <div class="card">
-    <div class="card-h"><h2>Riepilogo del periodo</h2><span class="muted small">Obiettivo ${ORE_TARGET} ore · clicca un nome per i dettagli</span></div>
+    <div class="card-h"><h2>Ore del periodo, studente per studente</h2><span class="muted small">Obiettivo ${ORE_TARGET} ore · tocca un nome per vedere i giorni</span></div>
     <div class="tbl-wrap"><table><thead><tr><th>Studente</th><th>Turni</th><th>Ore periodo</th><th>Avanzamento</th><th>Assenze</th><th>Ritardi</th><th>Monte ore anno</th></tr></thead><tbody>
     ${SY().map(s=>{const sm=summary(s.id), open=st.open===s.id, o=oreAnno(s);
       return `<tr class="click ${open?"sel":""}" data-action="open" data-sid="${s.id}" tabindex="0" aria-expanded="${open}">
@@ -968,7 +1004,7 @@ C.presenze = () => {
         <td class="num">${oreTxt(s)} <span class="chip ${o.c}">${o.txt}</span></td></tr>
         ${open?`<tr><td colspan="7"><div class="chips">${s.erasmus?`<span class="chip good">In Erasmus (${esc(s.erasmus)}): nessuna presenza in questo periodo.</span>`:UPTO.map(d=>{const a=rec(s.id,d),[l,c]=status(a,d);return `<span class="chip ${c}" title="${l}">${fmtDay(d,{day:"numeric",month:"numeric"})} ${a?`${a.in}–${a.out||"?"}`:"assente"}</span>`}).join("")}</div></td></tr>`:""}`}).join("")}
     </tbody></table></div>
-  </div>`;
+  </div>`; }
 };
 
 C.messaggi = () => {
@@ -1035,26 +1071,28 @@ P.home = () => {
     <div class="btn-row"><button class="btn" data-go="messaggi">Scrivi al coordinatore</button><button class="btn ghost" data-go="preferenze">Indica le tue preferenze</button></div></div>`;
   if (!r?.w) return `<div class="card"><h2>In attesa di assegnazione</h2><p class="muted" style="margin-top:6px">Il coordinatore non ha ancora pubblicato il tuo reparto per questo periodo.</p></div>`;
   const o = oreAnno(s);
-  return `<div class="grid2">
+  // In alto la cosa da fare oggi; sotto il reparto e le ore. Calendario e registro stanno in "Presenze".
+  return `<div class="card action-card">
+      <div><p class="label">Oggi · ${fmtDay(TODAY,{weekday:"long",day:"numeric",month:"long"})}</p>
+        <p class="state">${!a?"Non hai ancora timbrato l'entrata":!a.out?`In reparto dalle ${a.in}`:`Turno completato · ${a.in}–${a.out}`}</p>
+        <p class="muted small">${!a?"Quando arrivi, scansiona il QR che ti mostra il caposala.":!a.out?"Prima di andare via, scansiona di nuovo il QR.":"Ci vediamo domani: le ore sono già state contate."}</p></div>
+      ${a?.out ? `<button class="btn ghost" data-go="presenze">Vedi le presenze</button>` : `<button class="btn big" data-action="scan-open"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${I.qr}</svg>${!a?"Scansiona il QR di entrata":"Scansiona il QR di uscita"}</button>`}
+    </div>
+    <div class="grid2">
     <div class="card hero">
-      <p class="label">Il tuo reparto, ${PERIODO}</p>
+      <p class="label">Il tuo reparto · ${PERIODO}</p>
       <div><div class="ward">${esc(r.w.a)}</div><p class="muted">${esc(H[r.w.h].n)} · ${LIV_TXT[LIV[r.w.a]].toLowerCase()}</p></div>
-      <dl class="kv"><dt>Turno</dt><dd>07:00 – 14:00, lunedì–venerdì</dd><dt>Tutor</dt><dd>${esc(r.w.tutor)}</dd><dt>Distanza</dt><dd class="num">${r.f.d==null?"Domicilio non indicato":`${r.f.d} km da ${esc(s.com)}`}</dd><dt>Graduatoria</dt><dd class="num">${r.rank}ª su ${S.filter(x=>x.anno===s.anno&&!x.erasmus).length}</dd></dl>
-      <div class="why"><b>Perché ti è stato assegnato</b><div class="chips">${reasons(r.f)}</div></div>
+      <dl class="kv"><dt>Turno</dt><dd>07:00 – 14:00, lunedì–venerdì</dd><dt>Tutor</dt><dd>${esc(r.w.tutor)}</dd><dt>Distanza</dt><dd class="num">${r.f.d==null?"Domicilio non indicato":`${r.f.d} km da ${esc(s.com)}`}</dd></dl>
+      <div class="why"><b>Perché questo reparto</b><div class="chips">${reasons(r.f)}</div></div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:16px">
-      <div class="card"><div class="card-h"><h2>Oggi</h2><span class="muted small">${fmtDay(TODAY,{weekday:"long",day:"numeric",month:"long"})}</span></div>
-        <p style="margin-bottom:12px">${!a?"Non hai ancora registrato l'entrata.":!a.out?`Entrata alle <b class="num">${a.in}</b>. Ricordati di scansionare il QR all'uscita.`:`Turno completato: ${a.in} – ${a.out}.`}</p>
-        <button class="btn" data-go="presenze">${!a?"Registra entrata":!a.out?"Registra uscita":"Vedi le presenze"}</button></div>
-      <div class="card"><div class="card-h"><h2>Ore di tirocinio</h2><span class="num score">${Math.round(sm.ore)} / ${ORE_TARGET} h</span></div>
-        <div class="bar wide"><i style="width:${Math.min(100,sm.ore/ORE_TARGET*100)}%"></i></div>
-        <p class="muted small num" style="margin-top:8px">${sm.giorni} turni svolti · ${sm.assenze} assenze · ${sm.ritardi} ritardi</p>
-        <p class="small num" style="margin-top:8px">Nell'anno: <b>${oreTxt(s)}</b> <span class="chip ${o.c}">${o.txt}</span></p></div>
-    </div>
-  </div>
-  ${quick([["presenze","qr","Presenze tirocinio","Timbra entrata e uscita con il QR del reparto."],["percorso","route","Il mio percorso","Reparti fatti e quelli che ti mancano."],
-           ["messaggi","chat","Scrivi al coordinatore","Assenze, cambi turno, documenti."],["home","home","I miei turni","Calendario del periodo qui sotto."]])}
-  <div class="card"><div class="card-h"><h2>I miei turni del periodo</h2></div>${calendar(st.me)}</div>`;
+    <div class="card"><div class="card-h"><h2>Le tue ore</h2></div>
+      <p class="small muted">In questo periodo</p>
+      <p class="num score" style="font-size:1.4rem">${Math.round(sm.ore)} <span class="muted small">su ${ORE_TARGET} h</span></p>
+      <div class="bar wide"><i style="width:${Math.min(100,sm.ore/ORE_TARGET*100)}%"></i></div>
+      <p class="muted small num" style="margin-top:8px">${sm.giorni} turni · ${sm.assenze} assenze · ${sm.ritardi} ritardi</p>
+      <p class="small num" style="margin-top:12px">Nell'anno: <b>${oreTxt(s)}</b> <span class="chip ${o.c}">${o.txt}</span></p>
+      <p style="margin-top:14px"><button class="linkbtn" data-go="presenze">Calendario e registro presenze →</button></p></div>
+  </div>`;
 };
 P.preferenze = () => {
   const s = student(st.me), sel = (i) => `<select id="pref-${i}" aria-label="${i+1}ª scelta"><option value="">— Nessuna —</option>
@@ -1085,14 +1123,12 @@ function savePref(){
 P.percorso = () => {
   const s = student(st.me);
   return `<div class="grid2">${studDetail(st.me,false)}
-    <div class="card"><h2 style="margin-bottom:14px">Riepilogo</h2>
+    <div class="card"><h2 style="margin-bottom:14px">Cosa ti aspetta</h2>
       <dl class="kv">
-        <dt>Esperienze nel triennio</dt><dd class="num">${esperienze(s)}</dd>
         <dt>Prossimi periodi</dt><dd class="num">${PERIODI.filter(p=>p.anno===s.anno && p.dal>TODAY).map(p=>`${fmtDay(p.dal,{day:"numeric",month:"short"})} – ${fmtDay(p.al,{day:"numeric",month:"short"})}`).join("<br>") || "—"}</dd>
         <dt>Ospedali visti</dt><dd class="num">${new Set([...s.hist.map(h=>h[1]), mine(st.me)?.w?.h].filter(Boolean)).size} su ${Object.keys(H).length}</dd>
-        <dt>Turni nel periodo</dt><dd class="num">${summary(st.me).giorni} su ${DAYS.length}</dd>
       </dl>
-      <p class="muted small" style="margin-top:14px">Il conteggio include il reparto in corso. Per correggere un tirocinio passato scrivi al coordinatore dalla sezione Messaggi.</p>
+      <p class="muted small" style="margin-top:14px">Un tirocinio passato non è giusto? Scrivi al coordinatore da <button class="linkbtn" data-go="messaggi">Messaggi</button>.</p>
     </div></div>`;
 };
 P.presenze = () => {
@@ -1178,13 +1214,13 @@ function guideView(){
       card("1. Il primo accesso", ol([
         "Nella prima schermata scegli <b>Studente</b>, il tuo anno di corso e il tuo nome.",
         "In futuro entrerai con la tua <b>mail d'ateneo</b>: per ora la password non viene controllata.",
-        "In <b>La mia assegnazione</b> trovi reparto, ospedale, tutor, orario e il perché della scelta."])),
+        "In <b>Home</b> trovi reparto, ospedale, tutor, orario e il perché della scelta."])),
       card("2. Prima dell'assegnazione", ol([
         "Controlla i <b>requisiti</b>: se ne manca uno, la homepage te lo dice e non puoi essere assegnato.",
-        "Apri <b>Le mie preferenze</b>: indica fino a 3 ospedali o reparti, se non hai l'auto ed eventuali esigenze di lavoro o famiglia.",
+        "Apri <b>Preferenze</b>: indica fino a 3 ospedali o reparti, se non hai l'auto ed eventuali esigenze di lavoro o famiglia.",
         "Le preferenze vengono dopo i tuoi bisogni di apprendimento: non sono una garanzia."])),
       card("3. Ogni giorno in reparto", ol([
-        "<b>Quando arrivi</b> apri <b>Presenze tirocinio</b> e scansiona il QR mostrato dal caposala.",
+        "<b>Quando arrivi</b> apri <b>Presenze</b> e scansiona il QR mostrato dal caposala.",
         "<b>Quando esci</b> rifai la stessa cosa.",
         "Il QR vale solo per il tuo reparto e scade dopo 30 secondi: una foto mandata da un compagno non funziona."])),
       card("4. Durante il periodo", ul([
@@ -1206,8 +1242,8 @@ function guideView(){
         "<b>Revisione</b>: correggi i singoli casi con <b>Cambia</b>. Puoi mettere a mano anche un reparto di area critica: resta segnato come eccezione.",
         "<b>Pubblica</b>: gli studenti vedono il loro reparto."])),
       card("3. Ogni giorno", ol([
-        "<b>Panoramica › Da controllare</b>: requisiti mancanti, assenze, uscite non registrate, periodi da correggere.",
-        "<b>Presenze tirocinio</b>: registro del giorno, “Segna presente” o “Inserisci uscita” per sistemare i casi.",
+        "<b>Panoramica › Da fare</b>: requisiti mancanti, assenze, uscite non registrate, periodi da correggere.",
+        "<b>Presenze</b>: registro del giorno, “Segna presente” o “Inserisci uscita” per sistemare i casi.",
         "<b>Messaggi</b>: rispondi agli studenti."]))]],
     cap:["Caposala", [
       card("1. Accesso", ol([
@@ -1296,7 +1332,7 @@ function render(){
   const views = {coord:C, stud:P, caposala:K}[st.role], nav = NAV[st.role];
   if (!views[st.view]) st.view = nav[0][0];
   const html = views[st.view]();              // la vista segna i messaggi come letti: va calcolata prima dei badge
-  const label = nav.find(n=>n[0]===st.view)[1];
+  const label = TITOLI[st.view] || nav.find(n=>n[0]===st.view)?.[1] || "";
   $("nav").innerHTML = nav.map(([id,l])=>`<button data-go="${id}" ${id===st.view?'aria-current="page"':""}>${l}${id==="messaggi"&&unread()?`<span class="badge">${unread()}</span>`:""}</button>`).join("");
   const exit = `<button class="btn ghost sm" data-action="logout">Esci</button>`;
   const rep = WARDS.find(w=>w.id===st.qrWard);
@@ -1305,15 +1341,16 @@ function render(){
     : st.role==="caposala"
     ? `<span class="avatar" aria-hidden="true">CS</span><span><b>Caposala · ${esc(rep.a)}</b><br>${esc(H[rep.h].f)} · ${H[rep.h].city}</span>${exit}`
     : `<span class="avatar" aria-hidden="true">${esc(student(st.me).n.split(" ").map(x=>x[0]).join("").slice(0,2))}</span><span><b>${esc(student(st.me).n)}</b><br>Studente · ${ANNI[student(st.me).anno].label}</span>${exit}`;
-  $("period").textContent = st.role==="caposala" ? `Periodo in corso · ${PERIODO}` : `${ANNI[st.role==="coord" ? st.anno : student(st.me).anno].label} · Periodo 1 · ${PERIODO}`;
-  $("anni").hidden = st.role!=="coord" || st.view==="calendario";   // il calendario mostra tutti e tre gli anni
-  $("anni").innerHTML = Object.entries(ANNI).map(([k,a])=>`<button data-action="anno" data-v="${k}" aria-pressed="${+k===st.anno}">${a.label} <span class="num">${S.filter(s=>s.anno===+k).length}</span></button>`).join("");
-  $("eyebrow").innerHTML = `${{coord:"Area coordinatore", stud:"Area studente", caposala:"Area reparto"}[st.role]} <span aria-hidden="true">/</span> <b>${label}</b>`;
+  $("period").textContent = st.role==="coord" && st.view==="calendario" ? "Tutti e tre gli anni · a.a. 2026/27"
+    : `${st.role==="caposala" ? "" : ANNI[st.role==="coord" ? st.anno : student(st.me).anno].label + " · "}Periodo in corso: ${PERIODO}`;
+  // il selettore dell'anno serve solo al coordinatore, e non nelle pagine che valgono per tutti gli anni
+  $("anni-box").hidden = st.role!=="coord" || ["calendario","messaggi","idee"].includes(st.view);
+  $("anni").innerHTML = Object.entries(ANNI).map(([k,a])=>`<button data-action="anno" data-v="${k}" aria-pressed="${+k===st.anno}">${a.label} <span class="num muted">${S.filter(s=>s.anno===+k).length}</span></button>`).join("");
   $("title").textContent = label;
   // dopo il ridisegno rimette il focus sullo stesso controllo (tastiera e lettori di schermo)
-  const ae = document.activeElement, key = ae?.closest?.("#view") && (ae.name ? `[name="${ae.name}"][value="${ae.value}"]` : ae.dataset.ov ? `[data-ov="${ae.dataset.ov}"]` : null);
+  const ae = document.activeElement, key = ae?.closest?.("#view") && (ae.id==="q-stud" ? "#q-stud" : ae.name ? `[name="${ae.name}"][value="${ae.value}"]` : ae.dataset.ov ? `[data-ov="${ae.dataset.ov}"]` : null);
   $("view").innerHTML = html;
-  if (key) document.querySelector(key)?.focus();
+  if (key){ const el = document.querySelector(key); el?.focus(); if (key==="#q-stud") el.setSelectionRange(el.value.length, el.value.length); }
   if ($("qr-big")) drawQR($("qr-big"), qrToken(st.qrWard), +$("qr-big").dataset.size || 168), $("qr-token").textContent = qrToken(st.qrWard);
   if ($("chat")) $("chat").scrollTop = $("chat").scrollHeight;
 }
@@ -1335,6 +1372,13 @@ document.addEventListener("click", e => {
     case "req-all-ask": st.confirmReq = true; render(); break;
     case "req-all-no": st.confirmReq = false; render(); break;
     case "req-all": { const L = SY().filter(s=>!s.erasmus && !reqOk(s)); L.forEach(s => REQ.forEach(([k]) => s.req[k] = true)); st.confirmReq = false; render(); toast(`Requisiti segnati come completi per ${L.length} studenti.`); break; }
+    case "sfilt": st.sfilt = act.dataset.v; render(); break;
+    case "rep-h": st.repH = act.dataset.v; render(); break;
+    case "ptab": st.ptab = act.dataset.v; render(); break;
+    case "vai": st.view = act.dataset.goTo;
+      if (st.view==="assegnazione"){ st.step = 3; st.filter = act.dataset.filtro || "all"; }
+      if (st.view==="studenti") st.sfilt = act.dataset.filtro || "all";
+      render(); scrollTo({top:0}); break;
     case "guida": st.guide = true; st.gtab = {stud:"stud", coord:"coord", caposala:"cap"}[st.role] || "tir"; render(); scrollTo({top:0}); break;
     case "guida-chiudi": st.guide = false; render(); scrollTo({top:0}); break;
     case "gtab": st.gtab = act.dataset.v; render(); break;
@@ -1379,6 +1423,7 @@ document.addEventListener("keydown", e => {
   if (e.key==="Escape" && !$("modal").hidden) $("modal").hidden = true;
   if (e.key==="Enter" && e.target.matches("tr[data-action]")) e.target.click();
 });
+document.addEventListener("input", e => { if (e.target.id==="q-stud"){ st.q = e.target.value; render(); } });
 document.addEventListener("change", e => {
   const t = e.target;
   if (t.name==="method"){ st.method = t.value; render(); }
