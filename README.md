@@ -11,12 +11,13 @@ Prototipo di portale per organizzare i tirocini del **Corso di Laurea in Infermi
 - **Schermata di accesso** con due profili, Coordinatore (Michele Massaro) e Studente, ognuno con la sua homepage. Per ora l'accesso è solo dimostrativo: la password non viene verificata e il metodo definitivo è da decidere.
 - **Area coordinatore**, divisa per anno di corso (I, II, III anno):
   - panoramica;
-  - assegnazione dei reparti in 3 passi (automatica o manuale);
+  - assegnazione dei reparti in 3 passi (automatica o manuale), nell'ordine delle linee guida 2025: requisiti obbligatori, poi bisogni di apprendimento, poi posti e Guide, infine preferenze dello studente. La media (inserita dal coordinatore) serve solo per i pari merito;
+  - requisiti per studente (visita di sorveglianza sanitaria, corso sicurezza, laboratori propedeutici): chi non li ha non viene assegnato;
   - gestione studenti;
   - reparti con Guide e posti;
   - presenze con QR e monte ore annuale;
   - messaggi.
-- **Area studente**: reparto assegnato e motivazione, percorso, timbratura con QR, calendario dei turni, messaggi al coordinatore.
+- **Area studente**: requisiti mancanti, preferenze (fino a 3 scelte, "non ho l'auto", altre esigenze), reparto assegnato e motivazione, percorso, timbratura con QR, calendario dei turni, messaggi al coordinatore.
 
 Le regole (assegnazione, rapporto Guida-studente 1:2, debito orario del 10%, ecc.) seguono il documento *Principi e standard del tirocinio professionale* (Conferenza Permanente delle Professioni Sanitarie, 2025). Il riassunto è in [`docs/fonti-tirocinio.md`](docs/fonti-tirocinio.md).
 
