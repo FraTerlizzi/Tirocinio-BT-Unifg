@@ -1,0 +1,6 @@
+# file Excel/Word originali con dati personali: non vanno mai nel repository
+*.xls
+*.xlsx
+*.doc
+*.docx
+.claude/

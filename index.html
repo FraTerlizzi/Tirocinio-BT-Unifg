@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TurnoGiusto Tirocini</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="dati.js"></script>
+<style>
+/* Layout da portale sanitario pubblico: barra istituzionale sottile, intestazione bianca, menu orizzontale, briciole di pane, contenuto a schede.
+   Tema unico chiaro, colori smorzati: blu istituzionale per le azioni, rosso vino per titoli e barra superiore. */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#1C2733; --muted:#5A6775; --line:#DCE2E8; --hover:#EDF1F5;
+  --accent:#2A5D96; --accent-soft:#E5EDF6; --accent-ink:#FFFFFF;
+  --brand:#94404C; --brand-soft:#F5E8EA; --brand-ink:#FFFFFF;
+  --heavy:#B8683F; --heavy-soft:#F6EAE1; --light:#4E7D5B; --light-soft:#E6EFE8;
+  --warn:#8C6A24; --warn-soft:#F4ECD8;
+  --shadow:0 1px 2px rgb(28 39 51 / .05),0 4px 14px rgb(28 39 51 / .06);
+  --cam:#1A222B; --qr-card:#FFFFFF; --scrim:rgb(28 39 51 / .45);
+  --f-head:"Titillium Web",system-ui,sans-serif; --f-body:"Titillium Web",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0}img{max-width:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--f-body)}
+h1,h2,h3{font-family:var(--f-head);font-weight:700;text-wrap:balance;margin:0}
+h1{font-size:2.1rem;color:var(--brand);line-height:1.15}h2{font-size:1.25rem}h3{font-size:1.05rem}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.label{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+a{color:var(--accent)}
+.in{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* ---- testata ---- */
+.slim{background:var(--brand);color:var(--brand-ink);font-size:.82rem}
+.slim .in{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;min-height:38px}
+.slim .crumbs{font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+.slim .crumbs span{opacity:.7;margin:0 6px}
+.seg{display:flex;gap:2px;background:rgb(255 255 255 / .14);border-radius:6px;padding:2px}
+.seg button{border:0;background:transparent;color:var(--brand-ink);padding:3px 10px;border-radius:4px;font-size:.82rem;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--brand)}
+.head{background:var(--surface)}
+.head .in{display:flex;justify-content:space-between;align-items:center;gap:12px 20px;flex-wrap:wrap;padding-block:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.mark{width:42px;height:42px;border-radius:10px;background:var(--brand-soft);display:grid;place-items:center;flex:none}
+.brand b{font-family:var(--f-head);font-size:1.5rem;font-weight:700;display:block;line-height:1.1;color:var(--ink)}
+.brand small{color:var(--muted);font-size:.86rem}
+.side-foot{display:flex;align-items:center;gap:10px;font-size:.88rem;color:var(--muted);flex-wrap:wrap}
+.side-foot b{color:var(--ink)}
+.side-foot select{padding:7px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);font-weight:600}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700;font-size:.9rem;flex:none}
+.navbar{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{display:flex;align-items:center;gap:8px;padding:13px 12px 11px;color:var(--ink);border:0;background:transparent;cursor:pointer;font-weight:600;white-space:nowrap;border-bottom:3px solid transparent}
+nav button:hover{color:var(--accent)}
+nav button[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+.badge{background:var(--brand);color:var(--brand-ink);font-size:.72rem;font-weight:700;border-radius:999px;padding:0 7px;line-height:1.5}
+
+main{min-width:0;padding-block:22px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:22px;width:100%}
+.top{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:flex-end;justify-content:space-between}
+.crumb{font-size:.88rem;color:var(--muted)}
+.crumb b{color:var(--accent);font-weight:600}
+.period{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.86rem}
+.pill{display:inline-flex;padding:3px 10px;border-radius:4px;font-weight:600}
+.pill.per{background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.pill.demo{background:var(--warn-soft);color:var(--warn)}
+
+.card{background:var(--surface);border-radius:8px;padding:22px;min-width:0;box-shadow:var(--shadow)}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.hero-band{background:linear-gradient(100deg,var(--accent-soft) 0%,var(--surface) 70%);border-radius:8px;box-shadow:var(--shadow);padding:26px 28px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.hero-band h2{font-size:1.5rem}
+.hero-band p{color:var(--muted);margin-top:4px;max-width:60ch}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.qcard{background:var(--surface);border:0;border-radius:8px;box-shadow:var(--shadow);padding:18px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:transform .15s,box-shadow .15s}
+.qcard:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgb(28 39 51 / .06),0 10px 24px rgb(28 39 51 / .1)}
+.qcard .ic{width:40px;height:40px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;margin-bottom:4px}
+.qcard .ic svg{width:20px;height:20px}
+.qcard b{font-size:1.05rem}
+.qcard span{font-size:.88rem;color:var(--muted)}
+.qcard em{font-style:normal;color:var(--accent);font-weight:700;font-size:.88rem;margin-top:auto;padding-top:6px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.tile{background:var(--surface);border-radius:8px;box-shadow:var(--shadow);padding:16px 20px;display:flex;flex-direction:column;gap:2px;border-top:3px solid var(--accent)}
+.tile .v{font-family:var(--f-head);font-size:2rem;font-weight:700;line-height:1.15}
+.tile .s{font-size:.84rem;color:var(--muted)}
+.steps{display:flex;flex-direction:column;gap:12px;list-style:none;margin:0;padding:0;counter-reset:st}
+.steps li{counter-increment:st;display:grid;grid-template-columns:30px 1fr;gap:10px;font-size:.92rem}
+.steps li::before{content:counter(st);width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:.85rem}
+.steps b{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.alerts{display:flex;flex-direction:column;list-style:none;margin:0;padding:0}
+.alerts li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line);font-size:.92rem}
+.alerts li:first-child{border-top:0;padding-top:0}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:8px;flex:none;background:var(--warn)}
+.dot.ok{background:var(--light)}
+
+.chip{display:inline-flex;align-items:center;gap:6px;padding:1px 8px;border-radius:4px;font-size:.82rem;font-weight:600;white-space:nowrap;background:var(--hover);color:var(--muted)}
+.chip.P,.chip.L{background:transparent;padding:0;color:var(--ink);font-weight:400}
+.chip.P::before,.chip.L::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--heavy);flex:none}
+.chip.L::before{background:var(--light)}
+.chip.good{background:var(--accent-soft);color:var(--accent)}
+.chip.ok{background:var(--light-soft);color:var(--light)}
+.chip.bad{background:var(--warn-soft);color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:4px 12px}
+
+.tbl-wrap{overflow-x:auto;margin:0 -22px;padding:0 22px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:9px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:var(--hover)}
+tbody tr.sel{background:var(--accent-soft)}
+.who b{display:block;font-weight:700}
+.who small{color:var(--muted)}
+
+.btn{border:1px solid var(--accent);border-radius:6px;padding:9px 18px;font-weight:700;cursor:pointer;background:var(--accent);color:var(--accent-ink);white-space:nowrap}
+.btn:hover{background:#244F80;border-color:#244F80}
+.btn.ghost{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+.btn.ghost:hover{background:var(--accent-soft)}
+.btn.sm{padding:4px 12px;font-size:.86rem}
+.btn.big{padding:13px 22px;font-size:1.02rem;display:inline-flex;gap:10px;align-items:center}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:disabled:hover{background:var(--accent)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent);font-size:.88rem;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-align:left}
+.icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;width:34px;height:36px;cursor:pointer;flex:none}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;width:64px;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.bar.wide{width:100%}
+.score{font-weight:700;font-family:var(--f-head)}
+
+/* ---- Assegnazione in 3 passi ---- */
+.stepper{list-style:none;margin:0;padding:16px 22px;display:flex;flex-wrap:wrap;gap:6px 32px;background:var(--surface);border-radius:8px;box-shadow:var(--shadow)}
+.stepper button{border:0;background:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:2px 0;color:var(--muted);font-weight:600}
+.stepper .n{width:28px;height:28px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center;font-size:.85rem;font-weight:700}
+.stepper .done button{color:var(--ink)}
+.stepper .done .n{background:var(--light);border-color:var(--light);color:#fff}
+.stepper .cur button{color:var(--accent);font-weight:700}
+.stepper .cur .n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stepper .skip button{cursor:default;opacity:.55}
+.stepper small{font-weight:400}
+.narrow{max-width:760px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.choices.compact{grid-template-columns:1fr;gap:8px;margin-top:12px}
+.choice{display:flex;gap:12px;align-items:flex-start;padding:16px 18px;border:2px solid var(--line);border-radius:8px;cursor:pointer;background:var(--surface)}
+.choice:hover{border-color:#B9C7D6}
+.choice:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.choice input{accent-color:var(--accent);margin-top:5px;flex:none;width:17px;height:17px}
+.choice > span{display:flex;flex-direction:column;gap:3px;font-size:.92rem}
+.choice b{font-size:1.05rem}
+.choice em{font-style:normal;font-size:.74rem;font-weight:700;color:var(--light);background:var(--light-soft);padding:1px 7px;border-radius:4px;margin-left:8px;vertical-align:2px;text-transform:uppercase;letter-spacing:.04em}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap}
+.crit{display:grid;grid-template-columns:1fr 290px;gap:20px;align-items:start}
+.q{border:0;margin:0;padding:0 0 22px;min-width:0}
+.q + .q{border-top:1px solid var(--line);padding-top:20px}
+.q legend{font-family:var(--f-head);font-size:1.2rem;font-weight:700;padding:0;margin-bottom:4px}
+.lvl-row{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;padding:11px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.lvl-row:first-of-type{border-top:0;margin-top:6px}
+.lvl{display:inline-flex;border:1px solid var(--accent);border-radius:6px;overflow:hidden}
+.lvl label{position:relative;cursor:pointer}
+.lvl input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}
+.lvl span{display:block;padding:6px 13px;font-size:.86rem;color:var(--accent);font-weight:600;border-left:1px solid var(--accent)}
+.lvl label:first-child span{border-left:0}
+.lvl input:checked + span{background:var(--accent);color:var(--accent-ink)}
+.lvl input:focus-visible + span{outline:2px solid var(--ink);outline-offset:-3px}
+.preview{position:sticky;top:64px;display:flex;flex-direction:column;gap:14px;border-top:3px solid var(--brand)}
+.kv.big{grid-template-columns:1fr auto;row-gap:10px}
+.kv.big dd{font-family:var(--f-head);font-size:1.2rem;font-weight:700;text-align:right}
+.review{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+.review-h{display:flex;justify-content:space-between;gap:12px 20px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:4px 13px;font-size:.86rem;cursor:pointer;color:var(--muted);font-weight:600}
+.filters button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.rows{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1.15fr) auto;gap:4px 16px;align-items:start;padding:14px 0;border-top:1px solid var(--line)}
+.row .note{grid-column:2 / 4;grid-row:2}
+.row .act{grid-column:4;grid-row:1 / 3}
+.row.empty{display:block}
+.row .rk{color:var(--muted);font-size:.86rem;font-weight:700}
+.row .to b{display:block;font-weight:700}
+.row .to small,.row .note small{display:block;color:var(--muted);font-size:.84rem}
+.row .to select{width:100%;padding:7px 9px;border-radius:6px;border:1px solid var(--line);background:var(--surface)}
+.row .note{font-size:.88rem;display:flex;flex-direction:column;gap:3px}
+.row .act{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.flag{color:var(--warn);font-weight:700;display:flex;gap:7px;align-items:center}
+.flag::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn);flex:none}
+.side-panels{display:flex;flex-direction:column;gap:16px;position:sticky;top:64px}
+.side-panels > .card:first-child{border-top:3px solid var(--brand)}
+.confirm{background:var(--bg);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.seats-h{margin-top:10px}
+.seats-h summary{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-top:1px solid var(--line);cursor:pointer;font-weight:700;font-size:.9rem;list-style:none}
+.seats-h summary::-webkit-details-marker{display:none}
+.seats-h summary::before{content:"▸";color:var(--muted);margin-right:6px}
+.seats-h[open] summary::before{content:"▾"}
+.seats-h summary span:first-child{flex:1}
+.seats{list-style:none;margin:0 0 8px;padding:0;font-size:.86rem}
+.seats li{display:flex;justify-content:space-between;gap:10px;padding:5px 0 5px 16px}
+.seats li.over .num,.seats-h .over{color:var(--warn);font-weight:700}
+
+td select,.field input,.field select,.field textarea{padding:8px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);width:100%;min-width:0}
+.stud{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-items:start}
+.detail{display:flex;flex-direction:column;gap:16px;position:sticky;top:64px}
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.timeline li{display:grid;grid-template-columns:14px 1fr;gap:10px;padding-bottom:12px;position:relative}
+.timeline li::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--muted);margin-top:7px}
+.timeline li.next::before{background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.timeline li:not(:last-child)::after{content:"";position:absolute;left:4px;top:20px;bottom:0;width:2px;background:var(--line)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.92rem;margin:0}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600}
+.why{background:var(--accent-soft);border-radius:6px;padding:14px;font-size:.9rem;display:flex;flex-direction:column;gap:8px}
+.field{display:flex;flex-direction:column;gap:5px;font-size:.92rem}
+.field label,.flabel{font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hrow{display:flex;gap:6px}
+.err{color:var(--warn);font-size:.88rem;font-weight:700}
+.cap{display:flex;gap:3px}
+.cap i{width:14px;height:14px;border-radius:3px;border:2px solid var(--accent)}
+.cap i.on{background:var(--accent)}
+
+.hero{display:flex;flex-direction:column;gap:14px;border-top:3px solid var(--brand)}
+.hero .ward{font-family:var(--f-head);font-size:1.8rem;font-weight:700;line-height:1.15;color:var(--brand)}
+.cal{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:440px}
+.cal span{font-size:.76rem;color:var(--muted);text-align:center;font-weight:700}
+.cal i{font-style:normal;aspect-ratio:1.4;border-radius:6px;display:grid;place-items:center;font-size:.86rem;background:var(--bg);color:var(--muted);font-variant-numeric:tabular-nums}
+.cal i.p{background:var(--light-soft);color:var(--light);font-weight:700}
+.cal i.l{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.cal i.a{background:var(--heavy-soft);color:var(--heavy);font-weight:700}
+.cal i.t{outline:2px solid var(--accent);outline-offset:-2px;color:var(--ink);font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+.scan{display:flex;flex-direction:column;align-items:flex-start;gap:14px;border-top:3px solid var(--brand)}
+.scan .state{font-family:var(--f-head);font-size:1.45rem;font-weight:700}
+.qrbox{background:var(--qr-card);padding:12px;border-radius:8px;display:inline-block;border:1px solid var(--line);line-height:0}
+.qrbox img,.qrbox canvas{display:block}
+.qr-wrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.token{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;background:var(--bg);padding:2px 6px;border-radius:4px}
+
+.inbox{display:grid;grid-template-columns:290px 1fr;gap:20px;align-items:start}
+.threads{display:flex;flex-direction:column;gap:2px}
+.threads button{display:grid;grid-template-columns:1fr auto;gap:2px 8px;text-align:left;border:0;background:transparent;padding:10px;border-radius:6px;cursor:pointer}
+.threads button:hover{background:var(--hover)}
+.threads button[aria-current="true"]{background:var(--accent-soft)}
+.threads small{grid-column:1 / -1;color:var(--muted);font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat{display:flex;flex-direction:column;gap:10px;max-height:440px;overflow-y:auto;padding:4px 2px 12px}
+.msg{max-width:80%;padding:9px 13px;border-radius:10px 10px 10px 3px;background:var(--bg);font-size:.94rem;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:var(--accent-soft);border-radius:10px 10px 3px 10px}
+.msg small{display:block;color:var(--muted);font-size:.76rem;margin-top:3px}
+.compose{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.compose textarea{resize:vertical;min-height:70px}
+
+.ideas{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.ideas ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.ideas li b{display:block;font-weight:700;font-size:.96rem}
+.ideas li span{font-size:.9rem;color:var(--muted)}
+.tag{font-size:.72rem;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:1px}
+.tag.q{background:var(--light-soft);color:var(--light)}
+.tag.m{background:var(--warn-soft);color:var(--warn)}
+
+.modal{position:fixed;inset:0;background:var(--scrim);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:20}
+.modal .card{width:min(380px,100%);display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
+.cam{background:var(--cam);border-radius:10px;width:100%;aspect-ratio:1;display:grid;place-items:center;position:relative;overflow:hidden}
+.cam::before{content:"";position:absolute;inset:14%;border:3px solid rgb(255 255 255 / .85);border-radius:12px;clip-path:polygon(0 0,30% 0,30% 6%,6% 6%,6% 30%,0 30%,0 70%,6% 70%,6% 94%,30% 94%,30% 100%,70% 100%,70% 94%,94% 94%,94% 70%,100% 70%,100% 30%,94% 30%,94% 6%,70% 6%,70% 0,100% 0,100% 100%,0 100%)}
+.cam .line{position:absolute;left:16%;right:16%;height:2px;background:#8FB3DB;animation:sweep 2s ease-in-out infinite alternate}
+@keyframes sweep{from{top:18%}to{top:80%}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:11px 18px;border-radius:6px;font-size:.94rem;z-index:30;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+
+@media (max-width:1180px){
+  .review{grid-template-columns:1fr}
+  .side-panels{position:static;order:-1;display:grid;grid-template-columns:1fr 1fr;align-items:start}
+}
+@media (max-width:1020px){
+  .stud,.inbox,.crit{grid-template-columns:1fr}
+  .detail,.preview{position:static}
+  .tiles,.quick{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:760px){
+  h1{font-size:1.7rem}
+  .grid2,.ideas,.row2,.choices,.side-panels{grid-template-columns:1fr}
+  .row{grid-template-columns:34px minmax(0,1fr)}
+  .row .to,.row .note,.row .act{grid-column:2;grid-row:auto}
+  .row .act{align-items:center;flex-direction:row}
+  .slim .crumbs{display:none}
+}
+@media (max-width:460px){.tiles,.quick{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.cam .line{animation:none;top:50%}.qcard{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="slim"><div class="in">
+  <span class="crumbs">Corso di Laurea in Infermieristica<span>›</span>Tirocini clinici</span>
+  <div class="seg" role="group" aria-label="Area del portale"><button data-role="stud">Area studente</button><button data-role="coord">Area coordinatore</button></div>
+</div></div>
+<header class="head"><div class="in">
+  <div class="brand">
+    <div class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg></div>
+    <div><b>TurnoGiusto</b><small>Portale tirocini · Barletta · Andria · Bisceglie</small></div>
+  </div>
+  <div class="side-foot" id="who"></div>
+</div></header>
+<div class="navbar"><div class="in"><nav id="nav" aria-label="Sezioni"></nav></div></div>
+<main><div class="in">
+  <div class="wrap">
+    <header class="top">
+      <div><p class="crumb" id="eyebrow"></p><h1 id="title"></h1></div>
+      <div class="period">
+        <div class="filters" id="anni" role="group" aria-label="Anno di corso"></div>
+        <span class="pill per" id="period"></span>
+        <span class="pill demo">Demo · dati di esempio</span>
+      </div>
+    </header>
+    <div id="view" class="wrap"></div>
+  </div>
+</div></main>
+
+<div class="modal" id="modal" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="scan-title">
+    <h2 id="scan-title">Scansiona il QR del reparto</h2>
+    <div class="cam"><div class="qrbox" id="scan-qr"></div><div class="line"></div></div>
+    <p class="muted small">Nella versione reale si apre la fotocamera del telefono. Qui la scansione è simulata.</p>
+    <div class="btn-row"><button class="btn" data-action="scan-do">Simula scansione</button><button class="btn ghost" data-action="scan-close">Annulla</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+// ================= Dati di esempio =================
+const H = {
+  H1:{n:"Dimiccoli · Barletta", f:"Ospedale “Mons. R. Dimiccoli”", city:"Barletta", x:0, y:0},
+  H2:{n:"Bonomo · Andria", f:"Ospedale “L. Bonomo”", city:"Andria", x:1.7, y:-7.9},
+  H3:{n:"V. Emanuele II · Bisceglie", f:"Ospedale “Vittorio Emanuele II”", city:"Bisceglie", x:19.4, y:-7.9}
+};
+// km est/nord rispetto all'ospedale di Barletta, ricavati da latitudine e longitudine dei comuni
+const COM = {"Barletta":[0.5,1.3],"Andria":[1.6,-8.9],"Trani":[11.8,-3.3],"Bisceglie":[18.9,-7.3],"Canosa di Puglia":[-17.7,-9.4],
+  "Minervino Murge":[-16.7,-24.6],"Spinazzola":[-15.7,-37.9],"Margherita di Savoia":[-10.6,7.1],"Trinitapoli":[-15.7,5.7],
+  "San Ferdinando di Puglia":[-17.4,-0.6],"Corato":[11.4,-17.2],"Molfetta":[26.9,-11.9]};
+// shortcut: classificazione pesante/leggero indicativa, da validare con il coordinatore del Corso
+const TYPE = {"Anestesia e Rianimazione":"P","Cardiologia":"P","Chirurgia Generale":"P","Ematologia":"P","Pronto Soccorso e Medicina d'Urgenza":"P",
+  "Medicina Interna":"P","Nefrologia":"P","Neurologia":"P","Neurochirurgia":"P","Oncologia":"P","Ortopedia e Traumatologia":"P","Malattie Infettive":"P",
+  "Gastroenterologia":"L","Ginecologia e Ostetricia":"L","Oculistica":"L","Otorinolaringoiatria":"L","Pediatria":"L","Psichiatria (SPDC)":"L",
+  "Radioterapia Oncologica":"L","Chirurgia Plastica e Ricostruttiva":"L","Urologia":"L"};
+// Reparti di degenza di ciascun ospedale (fonte: schede ospedale qsalute.it). Posti e tutor sono di esempio.
+const BIG = ["Medicina Interna","Chirurgia Generale","Pronto Soccorso e Medicina d'Urgenza","Ortopedia e Traumatologia"];
+const SUR = ["Santoro","Vitale","Fontana","Caruso","Moretti","Lombardi","Barbieri","Rinaldi","Testa","Gissi","Losito","Dellisanti","Capacchione","Musci","Lattanzio","Cognetti","Ruggiero","Paolillo","Sardella","Cuocci","Fiore","Lamonaca","Pastore"];
+const WARDS = Object.entries({
+  H1:["Anestesia e Rianimazione","Cardiologia","Chirurgia Generale","Ematologia","Gastroenterologia","Ginecologia e Ostetricia","Pronto Soccorso e Medicina d'Urgenza",
+      "Medicina Interna","Nefrologia","Neurologia","Oculistica","Oncologia","Ortopedia e Traumatologia","Otorinolaringoiatria","Pediatria","Psichiatria (SPDC)","Radioterapia Oncologica"],
+  H2:["Anestesia e Rianimazione","Cardiologia","Chirurgia Generale","Chirurgia Plastica e Ricostruttiva","Ginecologia e Ostetricia","Medicina Interna","Nefrologia",
+      "Neurochirurgia","Neurologia","Oculistica","Ortopedia e Traumatologia","Pediatria","Urologia","Pronto Soccorso e Medicina d'Urgenza"],
+  H3:["Anestesia e Rianimazione","Cardiologia","Chirurgia Generale","Ginecologia e Ostetricia","Malattie Infettive","Pronto Soccorso e Medicina d'Urgenza",
+      "Medicina Interna","Ortopedia e Traumatologia","Pediatria","Psichiatria (SPDC)"]
+}).flatMap(([h,list]) => list.map(a => ({h, a, posti: BIG.includes(a) ? 4 : 2}))) // posti = Guide × 2 (rapporto max 1:2)
+  .map((w,i) => ({id:"w"+(i+1), ...w, tutor:`Inf. ${"ABCDFGLMNPRS"[i%12]}. ${SUR[i%SUR.length]}`}));
+const S = [
+  ["Giulia Ferri","IN20481",28.7,"Barletta",[["Medicina Interna","H2"],["Pediatria","H1"]]],
+  ["Marco Dicorato","IN20377",26.4,"Andria",[["Chirurgia Generale","H2"],["Ginecologia e Ostetricia","H1"]]],
+  ["Sara Lionetti","IN20512",29.3,"Trani",[["Ortopedia e Traumatologia","H3"],["Medicina Interna","H1"]]],
+  ["Luca Sgaramella","IN20295",24.8,"Canosa di Puglia",[["Medicina Interna","H1"]]],
+  ["Chiara Cafagna","IN20433",27.5,"Bisceglie",[["Pronto Soccorso e Medicina d'Urgenza","H3"],["Pediatria","H3"]]],
+  ["Davide Lomuscio","IN20308",25.9,"Minervino Murge",[["Medicina Interna","H2"],["Urologia","H2"]]],
+  ["Elena Dibenedetto","IN20466",28.1,"Andria",[["Cardiologia","H2"],["Oculistica","H1"]]],
+  ["Andrea Rizzi","IN20251",23.9,"Margherita di Savoia",[["Gastroenterologia","H1"]]],
+  ["Francesca Mastrodonato","IN20399",27.0,"Trinitapoli",[["Chirurgia Generale","H1"],["Psichiatria (SPDC)","H3"]]],
+  ["Matteo Lops","IN20342",26.8,"Corato",[["Ortopedia e Traumatologia","H2"],["Medicina Interna","H3"]]],
+  ["Alessia Papagni","IN20488",29.0,"Bisceglie",[["Ginecologia e Ostetricia","H3"],["Medicina Interna","H3"]]],
+  ["Simone Doronzo","IN20276",25.2,"San Ferdinando di Puglia",[["Medicina Interna","H1"],["Chirurgia Generale","H1"]]],
+  ["Martina Delvecchio","IN20455",27.9,"Barletta",[["Nefrologia","H1"],["Pediatria","H2"]]],
+  ["Nicola Porcelli","IN20319",26.1,"Spinazzola",[["Medicina Interna","H2"],["Ginecologia e Ostetricia","H2"]]],
+  ["Federica Leonetti","IN20470",28.4,"Trani",[["Cardiologia","H3"],["Otorinolaringoiatria","H1"]]],
+  ["Antonio Zagaria","IN20288",25.6,"Andria",[["Chirurgia Generale","H2"]]],
+  ["Roberta Sinigaglia","IN20441",27.2,"Molfetta",[["Medicina Interna","H3"],["Malattie Infettive","H3"]]],
+  ["Giuseppe Lacerenza","IN20263",24.5,"Barletta",[["Ortopedia e Traumatologia","H1"],["Urologia","H2"]]]
+].map(([n,m,media,com,hist],i)=>({id:"s"+(i+1),n,m,media,com,hist,anno:2}));
+// I e III anno: studenti reali da dati.js (media, domicilio e percorso non sono nel registro: si completano da "Studenti")
+(window.STUDENTI_REALI || []).forEach(r => S.push({id:"s"+(S.length+1), media:null, com:null, hist:[], ...r}));
+// shortcut: monte ore del III anno = massimo presente nel registro; II anno non indicato nei file. Da confermare con il coordinatore.
+const ANNI = {1:{label:"I anno", monte:570}, 2:{label:"II anno", monte:null}, 3:{label:"III anno", monte:444}};
+const fmtMedia = s => s.media==null ? "—" : s.media.toFixed(1).replace(".",",");
+const DEFAULT = {merito:70,nuovo:10,osp:3,dist:10,bal:6};
+
+// Calendario del periodo (lun-ven). Data "di oggi" fissa per la demo.
+const TODAY = "2026-11-24";
+const DAYS = []; for (let d=new Date(Date.UTC(2026,10,9)); d<=new Date(Date.UTC(2026,11,18)); d.setUTCDate(d.getUTCDate()+1)) { const g=d.getUTCDay(); if (g && g<6) DAYS.push(d.toISOString().slice(0,10)); }
+const UPTO = DAYS.filter(d=>d<=TODAY), PAST = DAYS.filter(d=>d<TODAY);
+const ORE_TARGET = DAYS.length*7, START = 7*60, TOLL = 10; // turno 07:00-14:00, ritardo oltre 10 minuti
+const fmtDay = (iso,o={weekday:"short",day:"numeric",month:"short"}) => new Date(iso+"T12:00:00Z").toLocaleDateString("it-IT",{...o,timeZone:"UTC"});
+const hm = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+const tm = s => +s.slice(0,2)*60 + +s.slice(3,5);
+
+// ================= Algoritmo di assegnazione =================
+// shortcut: linea d'aria x1.25 come stima della strada; per il progetto reale usare tempi di percorrenza (API mezzi pubblici)
+const km = (s,h) => { if (!COM[s.com]) return null; const [x,y] = COM[s.com]; return Math.round(Math.hypot(x-H[h].x, y-H[h].y)*1.25); };
+const load = s => s.hist.reduce((o,[a]) => (o[TYPE[a]]++, o), {P:0,L:0});
+const AREAS = [...new Set(WARDS.map(w=>w.a))];
+const need = s => AREAS.filter(a => !s.hist.some(h=>h[0]===a)).length / AREAS.length;
+function fit(s,w,W){
+  const d = km(s,w.h), done = s.hist.some(h=>h[0]===w.a), seen = s.hist.some(h=>h[1]===w.h);
+  const {P,L} = load(s), heavy = TYPE[w.a]==="P", bal = heavy ? P<=L : L<P;
+  const tot = W.nuovo+W.osp+W.dist+W.bal || 1;
+  const near = d==null ? 0.5 : 1-Math.min(d,60)/60;   // domicilio non indicato: punteggio neutro
+  const score = (W.nuovo*!done + W.osp*!seen + W.dist*near + W.bal*bal) / tot * 100;
+  return {score,d,done,seen,bal,heavy};
+}
+// Graduatoria (merito + bisogno), poi ognuno in ordine prende il reparto libero con affinità più alta
+// ov = scelte fatte a mano dal coordinatore: occupano il posto prima dell'algoritmo
+// Ogni anno di corso ha il suo periodo: i posti si contano per anno. Chi è in Erasmus non viene assegnato.
+function assign(W, ov={}, anno=st.anno){
+  const L = S.filter(s=>s.anno===anno && !s.erasmus), medie = L.map(s=>s.media).filter(x=>x!=null);
+  const lo = Math.min(...medie), hi = Math.max(...medie), m = W.merito/100;
+  const norm = s => s.media==null || hi===lo ? 0.5 : (s.media-lo)/(hi-lo);   // media mancante (o tutte uguali): valore centrale
+  const left = Object.fromEntries(WARDS.map(w=>[w.id,w.posti]));
+  for (const s of L) if (ov[s.id]) left[ov[s.id]]--;
+  return L.map(s => ({s, prio: m*norm(s) + (1-m)*need(s)}))
+    .sort((a,b) => b.prio-a.prio || (b.s.media??0)-(a.s.media??0))
+    .map((r,i) => {
+      if (r.s.id in ov){ const w = WARDS.find(x=>x.id===ov[r.s.id]); return {rank:i+1, ...r, w, f:w&&fit(r.s,w,W), best:false, manual:true}; }
+      const opts = WARDS.map(w=>({w,f:fit(r.s,w,W)})).sort((a,b)=>b.f.score-a.f.score || (a.f.d??0)-(b.f.d??0));
+      const got = opts.find(o=>left[o.w.id]>0);
+      if (got) left[got.w.id]--;
+      return {rank:i+1, ...r, w:got?.w, f:got?.f, best: !!got && got.f.score >= opts[0].f.score-0.01};
+    });
+}
+
+// ================= Stato =================
+const st = {role:"coord", view:"panoramica", anno:2, me:"s1", method:"auto", step:1, W:{...DEFAULT}, ov:{}, filter:"all", editRow:null, confirm:false, pub:{},
+            sel:"s1", editing:null, day:TODAY, open:null, thread:"s4", qrWard:"w1"};
+const assignment = (anno=st.anno) => {
+  const R = assign(st.W, st.ov, anno);
+  return st.method==="auto" ? R : R.map(r => r.manual ? r : {...r, w:undefined, f:undefined, best:false});
+};
+const student = sid => S.find(s=>s.id===sid);
+const mine = sid => assignment(student(sid).anno).find(r=>r.s.id===sid);
+const SY = () => S.filter(s=>s.anno===st.anno);   // studenti dell'anno scelto dal coordinatore
+
+// Presenze di esempio, generate in modo ripetibile
+let seed = 11; const rnd = () => { seed = seed+0x6D2B79F5|0; let t = Math.imul(seed^seed>>>15, 1|seed); t = t+Math.imul(t^t>>>7, 61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
+const A = [];
+[1,2,3].flatMap(a => assign(st.W, {}, a)).forEach((r,i) => {
+  const w = r.w?.id;
+  PAST.forEach(d => {
+    if (rnd()<0.05) return;
+    const inn = rnd()<0.07 ? START+TOLL+2+Math.floor(rnd()*15) : START-10+Math.floor(rnd()*16);
+    A.push({sid:r.s.id, d, w, in:hm(inn), out:hm(14*60+Math.floor(rnd()*14)), via:"QR"});
+  });
+  if (i%3) A.push({sid:r.s.id, d:TODAY, w, in:hm(START-9+Math.floor(rnd()*12)), out:null, via:"QR"});
+});
+const dropRec = (sid,d) => { const k = A.findIndex(a=>a.sid===sid&&a.d===d); if (k>=0) A.splice(k,1); };
+dropRec("s4","2026-11-17"); dropRec("s1",TODAY);
+{ const r = A.find(a=>a.sid==="s8"&&a.d==="2026-11-20"); if (r) r.out = null; }
+
+const M = [
+  {sid:"s1",from:"c",text:"Ciao Giulia, ricordati di caricare l'attestato del corso sicurezza entro venerdì.",t:"18 nov, 09:40",readC:true,readS:true},
+  {sid:"s1",from:"s",tipo:"Documenti",text:"Fatto, l'ho caricato ieri sera. Grazie!",t:"19 nov, 08:15",readC:true,readS:true},
+  {sid:"s4",from:"s",tipo:"Assenza",text:"Buongiorno, il 17 novembre ero assente per malattia. Ho consegnato il certificato in segreteria: serve altro?",t:"23 nov, 16:02",readC:false,readS:true},
+  {sid:"s9",from:"s",tipo:"Cambio turno",text:"È possibile fare cambio reparto con un collega dalla prossima settimana? Abbiamo già parlato con i tutor.",t:"24 nov, 07:31",readC:false,readS:true}
+];
+
+// ================= Utilità =================
+const $ = id => document.getElementById(id);
+const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const chip = (a,extra="") => `<span class="chip ${TYPE[a]}" title="${TYPE[a]==="P"?"Reparto pesante":"Reparto leggero"}">${esc(a)}${extra}</span>`;
+const wardName = w => w ? `${w.a} · ${H[w.h].n}` : "—";
+const recs = sid => A.filter(a=>a.sid===sid);
+const rec = (sid,d) => A.find(a=>a.sid===sid&&a.d===d);
+const hours = a => a && a.out ? (tm(a.out)-tm(a.in))/60 : 0;
+const isLate = a => !!a && tm(a.in) > START+TOLL;
+function status(a,d){
+  if (!a) return d<=TODAY ? ["Assente","bad"] : ["—",""];
+  if (!a.out) return d===TODAY ? ["In reparto","good"] : ["Uscita mancante","bad"];
+  return isLate(a) ? ["Ritardo","bad"] : ["Presente","ok"];
+}
+function summary(sid){
+  const r = recs(sid);
+  return {giorni:r.length, ore:r.reduce((t,a)=>t+hours(a),0), ritardi:r.filter(isLate).length,
+          mancanti:r.filter(a=>!a.out&&a.d<TODAY).length, assenze:student(sid)?.erasmus ? 0 : PAST.filter(d=>!rec(sid,d)).length};
+}
+// Monte ore annuale dal registro (Consensus 2025: debito fino al 10% = ammesso all'esame, oltre = piano di recupero)
+function oreAnno(s){
+  const monte = ANNI[s.anno].monte;
+  if (s.erasmus) return {txt:`Erasmus ${s.erasmus}`, c:"good", k:"erasmus"};
+  if (s.ore==null || !monte) return {txt:"Non registrate", c:"", k:"nd"};
+  const deb = monte - s.ore;
+  if (deb <= 0) return {txt:"Completato", c:"ok", k:"ok"};
+  if (deb <= monte*0.1) return {txt:`Debito ${deb} h · ammesso`, c:"good", k:"amm"};
+  return {txt:`Debito ${deb} h · recupero`, c:"bad", k:"rec"};
+}
+function reasons(f){
+  return [
+    f.done ? `<span class="chip bad">Reparto già svolto</span>` : `<span class="chip good">Reparto nuovo</span>`,
+    f.seen ? `<span class="chip">Ospedale già visto</span>` : `<span class="chip good">Ospedale nuovo</span>`,
+    f.d==null ? `<span class="chip">Domicilio non indicato</span>` : `<span class="chip ${f.d>30?"bad":""}">${f.d} km</span>`,
+    f.bal ? `<span class="chip good">Riequilibra il carico</span>` : ""
+  ].join("");
+}
+let tt; function toast(t){ const el=$("toast"); el.textContent=t; el.hidden=false; clearTimeout(tt); tt=setTimeout(()=>el.hidden=true,3200); }
+const qrToken = w => `TG-${w}-${TODAY.replaceAll("-","")}-${Math.floor(Date.now()/30000).toString(36).toUpperCase()}`;
+function drawQR(el,text,size){
+  if (!el) return; el.innerHTML = "";
+  if (window.QRCode) new QRCode(el,{text,width:size,height:size,colorDark:"#1D2A2E",colorLight:"#FFFFFF",correctLevel:QRCode.CorrectLevel.M});
+  else el.innerHTML = `<span class="token">${esc(text)}</span>`;
+}
+const unread = () => st.role==="coord" ? M.filter(m=>m.from==="s"&&!m.readC).length : M.filter(m=>m.sid===st.me&&m.from==="c"&&!m.readS).length;
+
+// ================= Icone e navigazione =================
+const I = {
+  grid:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  sliders:'<path d="M4 6h10M4 12h16M4 18h7"/><circle cx="17" cy="6" r="2"/><circle cx="14" cy="18" r="2"/>',
+  people:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.7 3 2.5 3.5 5.2"/>',
+  hosp:'<path d="M4 21V6l8-3 8 3v15M9 21v-5h6v5M12 8v4M10 10h4"/>',
+  qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-4M14 18v3"/>',
+  chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  idea:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/>',
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h8a3 3 0 0 0 0-6H8a3 3 0 0 1 0-6h8"/>'
+};
+const NAV = {
+  coord:[["panoramica","Panoramica","grid"],["assegnazione","Assegnazione","sliders"],["studenti","Studenti","people"],["reparti","Reparti","hosp"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"],["idee","Idee e sviluppi","idea"]],
+  stud:[["home","La mia assegnazione","home"],["percorso","Il mio percorso","route"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"]]
+};
+
+// ================= Viste coordinatore =================
+const C = {};
+const quick = list => `<div class="quick">${list.map(([go,ic,t,d])=>`<button class="qcard" data-go="${go}"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[ic]}</svg></span><b>${t}</b><span>${d}</span><em>Apri →</em></button>`).join("")}</div>`;
+C.panoramica = () => {
+  const R = assignment(), ok = R.filter(r=>r.w), Y = SY(), ids = new Set(Y.map(s=>s.id)), attivi = Y.filter(s=>!s.erasmus);
+  const nuovi = ok.filter(r=>!r.f.done).length;
+  const oggi = A.filter(a=>a.d===TODAY && ids.has(a.sid));
+  const lastDay = PAST[PAST.length-1];
+  const alerts = [
+    ...ok.filter(r=>r.f.done).map(r=>`<b>${esc(r.s.n)}</b> ripete ${esc(r.w.a)}.`),
+    ...ok.filter(r=>r.f.d>30).map(r=>`<b>${esc(r.s.n)}</b>: reparto a ${r.f.d} km da casa (${esc(r.s.com)} → ${esc(H[r.w.h].n)}).`),
+    ...R.filter(r=>!r.w).map(r=>`<b>${esc(r.s.n)}</b> non ha un reparto: aumentare i posti o assegnare a mano.`),
+    ...A.filter(a=>!a.out&&a.d<TODAY&&ids.has(a.sid)).map(a=>`<b>${esc(student(a.sid)?.n)}</b> non ha registrato l'uscita il ${fmtDay(a.d)}.`),
+    ...attivi.filter(s=>!rec(s.id,lastDay)).map(s=>`<b>${esc(s.n)}</b> assente ${fmtDay(lastDay)}.`),
+    ...Y.filter(s=>oreAnno(s).k==="rec").map(s=>`<b>${esc(s.n)}</b>: ${oreAnno(s).txt.toLowerCase()} (oltre il 10% del monte ore annuale).`)
+  ];
+  const nonArrivati = attivi.filter(s=>!rec(s.id,TODAY));
+  return `
+  <section class="hero-band">
+    <div><h2>Buongiorno, coordinatrice</h2><p>${ANNI[st.anno].label}: ${Y.length} studenti${Y.length-attivi.length?`, di cui ${Y.length-attivi.length} in Erasmus`:""}. Periodo dal 9 novembre al 18 dicembre 2026 in ${WARDS.length} reparti tra Barletta, Andria e Bisceglie. Oggi ${oggi.length} su ${attivi.length} hanno già timbrato l'entrata.</p></div>
+    <div class="btn-row"><button class="btn" data-go="assegnazione">Vai all'assegnazione</button><button class="btn ghost" data-go="presenze">Presenze di oggi</button></div>
+  </section>
+  ${quick([["assegnazione","sliders","Assegnazione reparti","Automatica o manuale, in 3 passi."],["presenze","qr","Presenze tirocinio","Registro con entrate e uscite via QR."],
+           ["studenti","people","Studenti","Aggiungi e modifica dati e percorsi."],["messaggi","chat","Messaggi",unread()?`${unread()} da leggere.`:"Nessun messaggio nuovo."]])}
+  <div class="tiles">
+    ${[[Y.length,"Studenti",`${ANNI[st.anno].label}, periodo 1`],
+       [`${oggi.length}/${attivi.length}`,"In reparto oggi",`timbrature QR di ${fmtDay(TODAY,{weekday:"long",day:"numeric",month:"long"})}`],
+       [Math.round(nuovi/(ok.length||1)*100)+"%","In un reparto nuovo",`${nuovi} studenti su ${ok.length}`],
+       [unread(),"Messaggi da leggere","dagli studenti"]]
+      .map(([v,l,s])=>`<div class="tile"><span class="label">${l}</span><span class="v num">${v}</span><span class="s">${s}</span></div>`).join("")}
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="card-h"><h2>Da controllare</h2><span class="muted small">${alerts.length} segnalazioni</span></div>
+      <ul class="alerts">${alerts.length ? alerts.slice(0,8).map(t=>`<li><span class="dot"></span><span>${t}</span></li>`).join("") + (alerts.length>8?`<li class="muted">… e altre ${alerts.length-8}</li>`:"") : `<li><span class="dot ok"></span><span>Nessuna criticità.</span></li>`}</ul></div>
+    <div class="card"><div class="card-h"><h2>Non ancora in reparto oggi <span class="muted num small">(${nonArrivati.length})</span></h2><button class="btn ghost sm" data-go="presenze">Registro completo</button></div>
+      <div class="tbl-wrap"><table><tbody>
+      ${nonArrivati.slice(0,12).map(s=>{const r=ok.find(x=>x.s===s);
+        return `<tr><td><b style="font-weight:600">${esc(s.n)}</b></td><td class="small muted">${r?esc(r.w.a):"—"}</td></tr>`}).join("") || `<tr><td class="muted">Tutti presenti.</td></tr>`}
+      ${nonArrivati.length>12?`<tr><td class="muted small" colspan="2">… e altri ${nonArrivati.length-12}: vedi il registro completo.</td></tr>`:""}
+      </tbody></table></div></div>
+  </div>`;
+};
+
+// ---- Assegnazione: 1 Metodo → 2 Criteri → 3 Revisione e pubblicazione ----
+const LEVELS = [[0,"Non conta"],[3,"Poco"],[6,"Abbastanza"],[10,"Molto"]];
+const ORDER = [[100,"Solo la media","Sceglie per primo chi ha la media più alta."],
+               [70,"Soprattutto la media","Conta di più la media, ma anche quanti reparti mancano."],
+               [30,"Soprattutto i reparti mancanti","Sceglie per primo chi ha più reparti da recuperare."]];
+const CRIT = [["nuovo","Un reparto mai fatto prima"],["osp","Un ospedale mai frequentato"],["dist","La vicinanza a casa"],["bal","L'alternanza tra reparti pesanti e leggeri"]];
+const used = R => R.reduce((o,r)=>(r.w && (o[r.w.id]=(o[r.w.id]||0)+1), o), {});
+const issues = (r,u) => !r.w ? ["Senza reparto"]
+  : [r.f.done && "Ripete un reparto già fatto", u[r.w.id]>r.w.posti && "Reparto oltre i posti", r.f.d>30 && `Lontano da casa (${r.f.d} km)`].filter(Boolean);
+const sig = () => JSON.stringify(assignment().map(r=>[r.s.id, r.w?.id]));
+
+C.assegnazione = () => {
+  const auto = st.method==="auto";
+  if (st.step===2 && !auto) st.step = 3;
+  const stepper = `<ol class="stepper">${[["Metodo",1],["Criteri",2],["Revisione e pubblicazione",3]].map(([l,n])=>{
+    const skip = n===2 && !auto;
+    return `<li class="${n<st.step?"done":""} ${n===st.step?"cur":""} ${skip?"skip":""}"><button data-action="step" data-n="${n}" ${skip?"disabled":""} ${n===st.step?'aria-current="step"':""}><span class="n">${n<st.step&&!skip?"✓":n}</span>${l}${skip?" <small>(solo per l'automatica)</small>":""}</button></li>`;
+  }).join("")}</ol>`;
+  return stepper + [null, stepMethod, stepCriteria, stepReview][st.step]();
+};
+
+function stepMethod(){
+  return `<div class="card narrow">
+    <h2>Come vuoi assegnare i reparti?</h2>
+    <p class="muted" style="margin-top:4px">Puoi cambiare idea quando vuoi: le correzioni fatte a mano restano.</p>
+    <div class="choices">
+      ${[["auto","Automatica","Il portale propone un reparto per ogni studente seguendo i criteri che scegli tu. Poi puoi correggere a mano i singoli casi.","consigliata"],
+         ["manual","Manuale","Scegli tu il reparto di ogni studente. Il portale ti avvisa se un reparto è pieno, già svolto o troppo lontano.",""]]
+        .map(([v,t,d,tag])=>`<label class="choice"><input type="radio" name="method" value="${v}" ${st.method===v?"checked":""}><span><b>${t}${tag?`<em>${tag}</em>`:""}</b><span class="muted">${d}</span></span></label>`).join("")}
+    </div>
+    <div class="actions"><button class="btn" data-action="step" data-n="${st.method==="auto"?2:3}">Avanti</button></div>
+  </div>`;
+}
+
+function stepCriteria(){
+  const R = assignment(), ok = R.filter(r=>r.w), u = used(R);
+  const conKm = ok.filter(r=>r.f.d!=null), avgKm = conKm.reduce((t,r)=>t+r.f.d,0)/(conKm.length||1);
+  return `<div class="crit">
+    <div class="card">
+      <fieldset class="q"><legend>Chi sceglie per primo?</legend>
+        <p class="muted small">Gli studenti vengono messi in graduatoria: chi è più in alto ottiene per primo il reparto più adatto a lui.</p>
+        <div class="choices compact">${ORDER.map(([v,t,d])=>`<label class="choice"><input type="radio" name="order" value="${v}" ${st.W.merito===v?"checked":""}><span><b>${t}</b><span class="muted">${d}</span></span></label>`).join("")}</div>
+      </fieldset>
+      <fieldset class="q"><legend>Nella scelta del reparto, quanto conta…</legend>
+        ${CRIT.map(([k,l])=>`<div class="lvl-row"><span id="lv-${k}-l">${l}</span><div class="lvl" role="radiogroup" aria-labelledby="lv-${k}-l">${LEVELS.map(([v,t])=>`<label><input type="radio" name="lv-${k}" value="${v}" ${st.W[k]===v?"checked":""}><span>${t}</span></label>`).join("")}</div></div>`).join("")}
+      </fieldset>
+      <div class="actions"><button class="btn ghost" data-action="step" data-n="1">Indietro</button><button class="btn" data-action="step" data-n="3">Vedi la proposta</button></div>
+    </div>
+    <aside class="card preview" aria-live="polite">
+      <div><h3>Con questi criteri</h3><p class="muted small">Si aggiorna mentre scegli.</p></div>
+      <dl class="kv big">
+        <dt>In un reparto nuovo</dt><dd class="num">${ok.filter(r=>!r.f.done).length} su ${R.length}</dd>
+        <dt>Al reparto più adatto</dt><dd class="num">${ok.filter(r=>r.best).length} su ${R.length}</dd>
+        <dt>Distanza media da casa</dt><dd class="num">${conKm.length ? Math.round(avgKm)+" km" : "—"}</dd>
+        <dt>Casi da controllare</dt><dd class="num">${R.filter(r=>issues(r,u).length).length}</dd>
+      </dl>
+      <button class="linkbtn" data-action="reset-crit">Ripristina i criteri consigliati</button>
+    </aside>
+  </div>`;
+}
+
+function stepReview(){
+  const auto = st.method==="auto", R = assignment(), u = used(R);
+  const rows = R.map(r=>({r, iss:issues(r,u)}));
+  const nIss = rows.filter(x=>x.iss.length).length, nMan = R.filter(r=>r.manual).length;
+  const shown = rows.filter(x => st.filter==="check" ? x.iss.length : st.filter==="manual" ? x.r.manual : true);
+  const pub = st.pub[st.anno] || {}, dirty = pub.sig !== sig();
+  const Y = SY(), senzaDati = Y.filter(s=>!s.erasmus && (s.media==null || !s.com)).length, erasmus = Y.filter(s=>s.erasmus).length;
+  const options = r => { const uu = {...u}; if (r.w) uu[r.w.id]--;
+    return `<option value="">— Nessun reparto —</option>` + Object.entries(H).map(([hid,h])=>`<optgroup label="${h.n}">${WARDS.filter(w=>w.h===hid).map(w=>{
+      const free = w.posti-(uu[w.id]||0);
+      return `<option value="${w.id}" ${r.w?.id===w.id?"selected":""}>${esc(w.a)} · ${free>0?`${free} ${free===1?"posto libero":"posti liberi"}`:"pieno"}</option>`;}).join("")}</optgroup>`).join(""); };
+  const fine = r => [r.f.done?"":"Reparto nuovo", r.f.seen?"ospedale già visto":"ospedale nuovo", r.f.d==null?"domicilio non indicato":`${r.f.d} km da casa`].filter(Boolean).join(" · ");
+
+  return `<div class="review">
+    <div class="card">
+      <div class="review-h">
+        <div><h2>${auto?"Proposta automatica":"Assegnazione manuale"}</h2>
+          <p class="muted small">${auto?"Studenti in ordine di graduatoria. Se un caso non ti convince, usa <b>Cambia</b>.":"Scegli il reparto di ogni studente: accanto a ogni reparto vedi i posti ancora liberi."}</p></div>
+        <div class="filters" role="group" aria-label="Mostra">
+          ${[["all",`Tutti · ${R.length}`],["check",`Da controllare · ${nIss}`],["manual",`Modificati a mano · ${nMan}`]].map(([v,l])=>`<button data-action="filter" data-v="${v}" aria-pressed="${st.filter===v}">${l}</button>`).join("")}
+        </div>
+      </div>
+      ${senzaDati||erasmus ? `<div class="why" style="margin:6px 0 4px">${senzaDati?`<span>Per <b>${senzaDati} studenti</b> mancano media o domicilio: per loro contano solo reparti già fatti e alternanza. Completa i dati dalla sezione <button class="linkbtn" data-go="studenti">Studenti</button>.</span>`:""}${erasmus?`<span>${erasmus} studenti in Erasmus non vengono assegnati.</span>`:""}</div>` : ""}
+      <ul class="rows">${shown.map(({r,iss})=>{
+        const editing = !auto || st.editRow===r.s.id;
+        return `<li class="row">
+          <span class="rk num" title="Posizione in graduatoria">${r.rank}°</span>
+          <div class="who"><b>${esc(r.s.n)}</b><small class="num">media ${fmtMedia(r.s)} · ${esc(r.s.com||"domicilio —")}</small></div>
+          <div class="to">${editing
+            ? `<select data-ov="${r.s.id}" aria-label="Reparto per ${esc(r.s.n)}">${options(r)}</select>`
+            : r.w ? `<b>${esc(r.w.a)}</b><small>${esc(H[r.w.h].n)} · ${TYPE[r.w.a]==="P"?"pesante":"leggero"}</small>` : `<b class="muted">Nessun reparto</b>`}</div>
+          <div class="note">${iss.length ? iss.map(t=>`<span class="flag">${t}</span>`).join("") : r.w ? `<span class="muted">${fine(r)}</span>` : ""}
+            ${auto && !r.manual && r.w && !r.best ? `<small>Il reparto ideale era già stato preso da chi è più in alto.</small>` : ""}
+            ${auto && r.manual ? `<small>Modificato a mano</small>` : ""}</div>
+          <div class="act">${!auto ? "" : st.editRow===r.s.id
+            ? `<button class="btn ghost sm" data-action="cancel-row">Fatto</button>`
+            : `<button class="btn ghost sm" data-action="edit-row" data-sid="${r.s.id}">Cambia</button>${r.manual?`<button class="linkbtn" data-action="reset-row" data-sid="${r.s.id}">Torna alla proposta</button>`:""}`}</div>
+        </li>`;}).join("") || `<li class="row empty muted">Nessuno studente in questo elenco.</li>`}</ul>
+    </div>
+    <aside class="side-panels">
+      <div class="card">
+        <h3>Pubblicazione</h3>
+        <p class="small" style="margin:6px 0 14px">${!pub.at ? `${ANNI[st.anno].label}: non ancora pubblicata. Gli studenti non vedono niente finché non pubblichi.`
+          : dirty ? `Pubblicata ${pub.at}. Ci sono modifiche non ancora pubblicate.` : `Pubblicata ${pub.at}. Gli studenti vedono il loro reparto.`}</p>
+        ${st.confirm
+          ? `<div class="confirm"><p class="small"><b>Pubblicare ${R.filter(r=>r.w).length} assegnazioni?</b> Gli studenti le vedranno subito e riceveranno una notifica.${nIss?` Restano ${nIss} casi da controllare.`:""}</p>
+             <div class="btn-row"><button class="btn" data-action="confirm-pub">Sì, pubblica</button><button class="btn ghost" data-action="cancel-pub">Annulla</button></div></div>`
+          : `<button class="btn wide" data-action="publish" ${pub.at&&!dirty?"disabled":""}>${pub.at?"Pubblica le modifiche":"Pubblica agli studenti"}</button>`}
+      </div>
+      <div class="card">
+        <h3>Posti per reparto</h3>
+        ${Object.entries(H).map(([hid,h])=>{const ws = WARDS.filter(w=>w.h===hid), tot = ws.reduce((t,w)=>t+w.posti,0), occ = ws.reduce((t,w)=>t+(u[w.id]||0),0), over = ws.some(w=>(u[w.id]||0)>w.posti);
+          return `<details class="seats-h" ${over?"open":""}><summary><span>${h.city}</span><span class="num ${over?"over":""}">${occ} / ${tot}</span></summary>
+          <ul class="seats">${ws.map(w=>{const n=u[w.id]||0; return `<li class="${n>w.posti?"over":""}"><span>${esc(w.a)}</span><span class="num">${n} / ${w.posti}</span></li>`;}).join("")}</ul></details>`;}).join("")}
+      </div>
+      ${auto ? `<button class="linkbtn" data-action="step" data-n="2">← Torna ai criteri</button>` : ""}
+    </aside>
+  </div>`;
+}
+
+C.studenti = () => {
+  const R = assignment(), Y = SY();
+  if (!Y.some(s=>s.id===st.sel)) st.sel = Y[0]?.id;
+  return `<div class="stud">
+    <div class="card">
+      <div class="card-h"><h2>Studenti del ${ANNI[st.anno].label} <span class="muted num small">(${Y.length})</span></h2><button class="btn" data-action="new-stud">+ Aggiungi studente</button></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Studente</th><th>Media</th><th>Domicilio</th><th>Reparti svolti</th><th>Reparto attuale</th><th>Ore anno</th></tr></thead><tbody>
+      ${Y.map(s=>{const l=load(s), r=R.find(x=>x.s===s), o=oreAnno(s);
+        return `<tr class="click ${s.id===st.sel?"sel":""}" data-action="sel-stud" data-sid="${s.id}" tabindex="0">
+        <td class="who"><b>${esc(s.n)}</b><small class="num">${esc(s.m||"matricola —")}</small></td>
+        <td class="num">${fmtMedia(s)}</td><td>${esc(s.com||"—")}</td>
+        <td><div class="chips">${s.hist.map(([a])=>chip(a)).join("")||'<span class="muted">—</span>'}</div>${s.hist.length?`<small class="muted num">${l.P} pesanti · ${l.L} leggeri</small>`:""}</td>
+        <td>${r?.w?chip(r.w.a):'<span class="muted">—</span>'}</td>
+        <td class="num">${s.ore!=null?`${s.ore}${ANNI[s.anno].monte?` / ${ANNI[s.anno].monte}`:""} h<br>`:""}<span class="chip ${o.c}">${o.txt}</span></td></tr>`}).join("")}
+      </tbody></table></div>
+    </div>
+    ${st.editing ? studForm() : studDetail(st.sel, true)}
+  </div>`;
+};
+function studDetail(sid, coord){
+  const s = student(sid), r = mine(sid) || {rank:"—"}, l = load(s), sm = summary(sid), o = oreAnno(s), lab = ANNI[s.anno].label;
+  const missA = AREAS.filter(a=>!s.hist.some(h=>h[0]===a)), missH = Object.keys(H).filter(h=>!s.hist.some(x=>x[1]===h));
+  return `<div class="card detail">
+    <div class="card-h" style="margin:0;align-items:flex-start"><div><p class="label">Percorso di tirocinio</p><h2 style="margin-top:2px">${esc(s.n)}</h2><p class="muted num small">${lab} · ${esc(s.m||"matricola —")} · media ${fmtMedia(s)}${s.media!=null?"/30":""}</p></div>
+      ${coord?`<button class="btn ghost sm" data-action="edit-stud" data-sid="${s.id}">Modifica dati</button>`:""}</div>
+    ${s.media==null||!s.com ? `<p class="small chip bad" style="white-space:normal">Dati da completare: ${[s.media==null&&"media",!s.com&&"domicilio",!s.hist.length&&s.anno>1&&"tirocini svolti"].filter(Boolean).join(", ")}.</p>` : ""}
+    <dl class="kv">
+      <dt>Domicilio</dt><dd>${esc(s.com||"Non indicato")}</dd>
+      <dt>Carico svolto</dt><dd class="num">${l.P} pesanti · ${l.L} leggeri</dd>
+      <dt>Graduatoria</dt><dd class="num">${s.erasmus?"In Erasmus":`${r.rank}ª su ${S.filter(x=>x.anno===s.anno&&!x.erasmus).length}`}</dd>
+      <dt>Ore nell'anno</dt><dd class="num">${s.ore!=null?`${s.ore}${ANNI[s.anno].monte?` su ${ANNI[s.anno].monte}`:""} h · `:""}${o.txt}</dd>
+      <dt>Presenze periodo</dt><dd class="num">${sm.giorni} turni · ${Math.round(sm.ore)} h su ${ORE_TARGET} h</dd>
+    </dl>
+    <ol class="timeline">
+      ${s.hist.map(([a,h],i)=>`<li><span>${chip(a)}<br><small class="muted">tirocinio ${i+1} · ${H[h].n}</small></span></li>`).join("")}
+      <li class="next"><span>${s.erasmus?`<span class="chip good">Erasmus ${esc(s.erasmus)}</span>`:r.w?chip(r.w.a):'<span class="chip bad">Da assegnare</span>'}<br><small class="muted">${lab} · periodo 1 · ${r.w?H[r.w.h].n:"—"} · in corso</small></span></li>
+    </ol>
+    ${r.w?`<div class="why"><b>Perché questo reparto</b><div class="chips">${reasons(r.f)}</div><span class="muted">Affinità ${Math.round(r.f.score)}/100.</span></div>`:""}
+    <div><p class="label" style="margin-bottom:6px">Reparti ancora da fare</p><div class="chips">${missA.map(a=>chip(a)).join("")||'<span class="muted">Nessuno</span>'}</div></div>
+    <div><p class="label" style="margin-bottom:6px">Ospedali mai frequentati</p><div class="chips">${missH.map(h=>`<span class="chip">${H[h].n}</span>`).join("")||'<span class="muted">Nessuno</span>'}</div></div>
+  </div>`;
+}
+function studForm(){
+  const e = st.editing, opt = (list,v) => list.map(([val,txt])=>`<option value="${esc(val)}" ${val===v?"selected":""}>${esc(txt)}</option>`).join("");
+  return `<form class="card detail" data-form="stud" novalidate>
+    <div><p class="label">${e.id?"Modifica dati":"Nuovo studente"}</p><h2 style="margin-top:2px">${e.id?esc(e.n):"Aggiungi studente"}</h2></div>
+    <div class="field"><label for="f-n">Nome e cognome</label><input id="f-n" value="${esc(e.n)}" autocomplete="off"></div>
+    <div class="row2">
+      <div class="field"><label for="f-m">Matricola</label><input id="f-m" value="${esc(e.m)}" autocomplete="off"></div>
+      <div class="field"><label for="f-media">Media voti</label><input id="f-media" type="number" min="18" max="30" step="0.1" value="${esc(e.media??"")}" placeholder="Non indicata"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="f-anno">Anno di corso</label><select id="f-anno">${opt(Object.entries(ANNI).map(([k,a])=>[k,a.label]),String(e.anno))}</select></div>
+      <div class="field"><label for="f-com">Domicilio</label><select id="f-com">${opt([["","Non indicato"],...Object.keys(COM).map(c=>[c,c])],e.com||"")}</select></div>
+    </div>
+    <div class="field"><span class="flabel">Tirocini già svolti</span>
+      ${e.hist.map(([a,h],k)=>`<div class="hrow">
+        <select data-h="a" aria-label="Reparto ${k+1}">${opt(Object.keys(TYPE).map(x=>[x,x]),a)}</select>
+        <select data-h="h" aria-label="Ospedale ${k+1}">${opt(Object.entries(H).map(([id,o])=>[id,o.n]),h)}</select>
+        <button type="button" class="icon-btn" data-action="del-hist" data-k="${k}" aria-label="Rimuovi tirocinio ${k+1}">×</button></div>`).join("")}
+      <div><button type="button" class="btn ghost sm" data-action="add-hist">+ Aggiungi tirocinio</button></div>
+    </div>
+    <p class="err" id="f-err" hidden></p>
+    <div class="btn-row"><button class="btn" type="submit">Salva</button><button class="btn ghost" type="button" data-action="cancel-edit">Annulla</button></div>
+  </form>`;
+}
+function readForm(){
+  const e = st.editing, f = document.querySelector('[data-form="stud"]');
+  e.n = $("f-n").value; e.m = $("f-m").value; e.media = $("f-media").value; e.com = $("f-com").value; e.anno = +$("f-anno").value;
+  const a = [...f.querySelectorAll('[data-h="a"]')].map(x=>x.value), h = [...f.querySelectorAll('[data-h="h"]')].map(x=>x.value);
+  e.hist = a.map((x,i)=>[x,h[i]]);
+}
+function saveForm(){
+  readForm();
+  const e = st.editing, n = e.n.trim(), m = e.m.trim().toUpperCase(), vuota = String(e.media??"").trim()==="", media = Number(String(e.media).replace(",","."));
+  const err = !n || n.length<3 ? "Inserisci nome e cognome."
+    : m && !m.includes("*") && S.some(s=>s.m===m && s.id!==e.id) ? "Questa matricola è già presente."   // le matricole oscurate si ripetono
+    : !vuota && !(media>=18 && media<=30) ? "La media deve essere un numero tra 18 e 30, oppure lasciala vuota."
+    : "";
+  if (err){ $("f-err").textContent = err; $("f-err").hidden = false; return; }
+  const data = {n, m, media: vuota ? null : Math.round(media*10)/10, com:e.com||null, hist:e.hist, anno:e.anno};
+  if (e.id) Object.assign(student(e.id), data);
+  else { const id = "s"+(Math.max(...S.map(s=>+s.id.slice(1)))+1); S.push({id,...data}); st.sel = id; }
+  st.editing = null; render(); toast(e.id ? "Dati aggiornati." : `Studente aggiunto: ${n}.`);
+}
+
+C.reparti = () => { const ok = assignment().filter(r=>r.w);
+  return Object.entries(H).map(([id,h])=>`<div class="card">
+    <div class="card-h"><div><h2>${h.f}</h2><p class="muted small">${h.city} · ${WARDS.filter(w=>w.h===id).length} reparti</p></div><span class="muted num small">${ok.filter(r=>r.w.h===id).length} studenti assegnati</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Reparto</th><th>Tipo</th><th>Tutor</th><th title="Ogni Guida segue al massimo 2 studenti">Guide</th><th>Posti</th><th>Assegnati · ${ANNI[st.anno].label}</th></tr></thead><tbody>
+    ${WARDS.filter(w=>w.h===id).map(w=>{const who = ok.filter(r=>r.w.id===w.id);
+      return `<tr><td><b style="font-weight:600">${w.a}</b></td><td>${TYPE[w.a]==="P"?'<span class="chip P">Pesante</span>':'<span class="chip L">Leggero</span>'}</td>
+      <td class="muted">${w.tutor}</td><td class="num">${w.posti/2}</td>
+      <td><div class="cap" aria-label="${who.length} su ${w.posti} posti">${Array.from({length:Math.max(w.posti,who.length)},(_,k)=>`<i class="${k<who.length?"on":""}"></i>`).join("")}</div></td>
+      <td>${who.map(r=>esc(r.s.n)).join(", ")||'<span class="muted">—</span>'}</td></tr>`}).join("")}
+    </tbody></table></div></div>`).join(""); };
+
+function monteOre(){
+  const Y = SY(), monte = ANNI[st.anno].monte;
+  if (!monte) return `<div class="card"><h2>Monte ore annuale</h2><p class="muted small" style="margin-top:6px">Per il ${ANNI[st.anno].label} il registro delle ore non è ancora stato caricato.</p></div>`;
+  const n = k => Y.filter(s=>oreAnno(s).k===k).length;
+  return `<div class="card"><div class="card-h"><div><h2>Monte ore annuale · ${ANNI[st.anno].label}</h2><p class="muted small">Dal registro ufficiale delle ore. Monte ore ${monte} h; una settimana = 42 h.</p></div></div>
+    <div class="tiles">
+      ${[[n("ok"),"Completato",`${monte} h o più`],[n("amm"),"Debito fino al 10%",`ammessi all'esame, recupero entro il III anno`],
+         [n("rec"),"Debito oltre il 10%","serve un piano di recupero"],[n("erasmus")+n("nd"),"Erasmus o non registrate",`${n("erasmus")} Erasmus · ${n("nd")} senza ore`]]
+        .map(([v,l,s])=>`<div class="tile"><span class="label">${l}</span><span class="v num">${v}</span><span class="s">${s}</span></div>`).join("")}
+    </div></div>`;
+}
+C.presenze = () => {
+  const R = assignment(), d = st.day, k = UPTO.indexOf(d);
+  const rows = R.map(r=>({r, a:rec(r.s.id,d)}));
+  const cnt = l => rows.filter(x=>status(x.a,d)[0]===l).length;
+  return `<div class="grid2">
+    <div class="card"><div class="card-h"><h2>QR del giorno</h2>
+      <select id="qr-ward" aria-label="Reparto" style="padding:6px 8px;border-radius:7px;border:1px solid var(--line);background:var(--surface);max-width:100%">${WARDS.map(w=>`<option value="${w.id}" ${w.id===st.qrWard?"selected":""}>${esc(wardName(w))}</option>`).join("")}</select></div>
+      <div class="qr-wrap"><div class="qrbox" id="qr-big"></div>
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:0;flex:1">
+          <p class="small">Da mostrare su un tablet all'ingresso del reparto. Il codice cambia ogni 30 secondi: una foto girata su WhatsApp non funziona.</p>
+          <p class="small muted">Si rinnova tra <b class="num" id="qr-count">30</b> s</p>
+          <span class="token" id="qr-token"></span>
+        </div></div>
+    </div>
+    <div class="card"><h2 style="margin-bottom:14px">Come funziona la presenza</h2><ol class="steps">
+      <li><span><b>Arrivo in reparto</b>Lo studente apre il portale sul telefono e scansiona il QR esposto all'ingresso.</span></li>
+      <li><span><b>Controlli automatici</b>Il codice deve essere valido, del reparto assegnato a quello studente e scansionato vicino all'ospedale.</span></li>
+      <li><span><b>Entrata e uscita</b>La prima scansione del giorno registra l'entrata, la seconda l'uscita. Le ore si calcolano da sole.</span></li>
+      <li><span><b>Verifica</b>Il coordinatore vede tutto qui per nome. Ritardi e uscite mancanti vengono segnalati e si correggono a mano.</span></li>
+    </ol></div>
+  </div>
+  <div class="card">
+    <div class="card-h"><h2>Registro del giorno</h2>
+      <div class="btn-row"><button class="icon-btn" data-action="day" data-step="-1" ${k<=0?"disabled":""} aria-label="Giorno precedente">‹</button>
+        <select id="day" aria-label="Giorno" style="padding:6px 8px;border-radius:7px;border:1px solid var(--line);background:var(--surface)">${UPTO.map(x=>`<option value="${x}" ${x===d?"selected":""}>${fmtDay(x)}${x===TODAY?" (oggi)":""}</option>`).join("")}</select>
+        <button class="icon-btn" data-action="day" data-step="1" ${k>=UPTO.length-1?"disabled":""} aria-label="Giorno successivo">›</button></div></div>
+    <div class="chips" style="margin-bottom:12px"><span class="chip ok">Presenti ${cnt("Presente")+cnt("Ritardo")}</span>${d===TODAY?`<span class="chip good">In reparto ${cnt("In reparto")}</span>`:""}<span class="chip bad">Ritardi ${cnt("Ritardo")}</span><span class="chip bad">Assenti ${cnt("Assente")}</span>${cnt("Uscita mancante")?`<span class="chip bad">Uscite mancanti ${cnt("Uscita mancante")}</span>`:""}</div>
+    <div class="tbl-wrap"><table><thead><tr><th>Studente</th><th>Reparto</th><th>Entrata</th><th>Uscita</th><th>Ore</th><th>Stato</th><th></th></tr></thead><tbody>
+    ${rows.map(({r,a})=>{const [l,c]=status(a,d), w = a ? WARDS.find(x=>x.id===a.w) : r.w;
+      return `<tr><td class="who"><b>${esc(r.s.n)}</b><small class="num">${esc(r.s.m)}</small></td>
+      <td class="small">${w?esc(w.a):"—"}</td>
+      <td class="num">${a?a.in:"—"}</td><td class="num">${a?.out||"—"}</td><td class="num">${a?.out?hours(a).toFixed(1):"—"}</td>
+      <td><div class="chips"><span class="chip ${c}">${l}</span>${a?.via==="manuale"?'<span class="chip">manuale</span>':""}</div></td>
+      <td>${!a?`<button class="btn ghost sm" data-action="mark" data-sid="${r.s.id}">Segna presente</button>`:(!a.out&&d<TODAY?`<button class="btn ghost sm" data-action="fix-out" data-sid="${r.s.id}">Inserisci uscita 14:00</button>`:"")}</td></tr>`}).join("")}
+    </tbody></table></div>
+  </div>
+  ${monteOre()}
+  <div class="card">
+    <div class="card-h"><h2>Riepilogo del periodo</h2><span class="muted small">Obiettivo ${ORE_TARGET} ore · clicca un nome per i dettagli</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Studente</th><th>Turni</th><th>Ore periodo</th><th>Avanzamento</th><th>Assenze</th><th>Ritardi</th><th>Monte ore anno</th></tr></thead><tbody>
+    ${SY().map(s=>{const sm=summary(s.id), open=st.open===s.id, o=oreAnno(s);
+      return `<tr class="click ${open?"sel":""}" data-action="open" data-sid="${s.id}" tabindex="0" aria-expanded="${open}">
+        <td><b style="font-weight:600">${esc(s.n)}</b></td><td class="num">${sm.giorni}</td><td class="num">${Math.round(sm.ore)} h</td>
+        <td style="min-width:120px"><div class="bar wide"><i style="width:${Math.min(100,sm.ore/ORE_TARGET*100)}%"></i></div><small class="muted num">${Math.round(sm.ore/ORE_TARGET*100)}%</small></td>
+        <td class="num">${sm.assenze}</td><td class="num">${sm.ritardi}</td>
+        <td class="num">${s.ore!=null?`${s.ore} h `:""}<span class="chip ${o.c}">${o.txt}</span></td></tr>
+        ${open?`<tr><td colspan="7"><div class="chips">${s.erasmus?`<span class="chip good">In Erasmus (${esc(s.erasmus)}): nessuna presenza in questo periodo.</span>`:UPTO.map(d=>{const a=rec(s.id,d),[l,c]=status(a,d);return `<span class="chip ${c}" title="${l}">${fmtDay(d,{day:"numeric",month:"numeric"})} ${a?`${a.in}–${a.out||"?"}`:"assente"}</span>`}).join("")}</div></td></tr>`:""}`}).join("")}
+    </tbody></table></div>
+  </div>`;
+};
+
+C.messaggi = () => {
+  const ids = [...new Set(M.map(m=>m.sid))].sort((a,b)=>M.findLastIndex(m=>m.sid===b)-M.findLastIndex(m=>m.sid===a));
+  if (!ids.includes(st.thread)) st.thread = ids[0];
+  M.filter(m=>m.sid===st.thread&&m.from==="s").forEach(m=>m.readC=true);
+  return `<div class="inbox">
+    <div class="card threads" style="padding:8px">${ids.map(id=>{const last=M.filter(m=>m.sid===id).at(-1), n=M.filter(m=>m.sid===id&&m.from==="s"&&!m.readC).length;
+      return `<button data-action="thread" data-sid="${id}" aria-current="${id===st.thread}"><b>${esc(student(id)?.n)}</b>${n?`<span class="badge">${n}</span>`:`<span class="muted small">${esc(last.t.split(",")[0])}</span>`}<small>${last.from==="c"?"Tu: ":""}${esc(last.text)}</small></button>`}).join("")}</div>
+    <div class="card">${chatBox(st.thread,"c")}</div>
+  </div>`;
+};
+function chatBox(sid, me){
+  const s = student(sid);
+  return `<div class="card-h"><div><h2>${me==="c"?esc(s?.n):"Coordinatrice tirocini"}</h2><p class="muted small">${me==="c"?esc(s?.m)+" · "+esc(wardName(mine(sid)?.w)):"Risposta di solito entro un giorno lavorativo"}</p></div></div>
+    <div class="chat" id="chat">${M.filter(m=>m.sid===sid).map(m=>`<div class="msg ${m.from===me?"me":""}">${m.tipo?`<span class="chip" style="margin-bottom:4px">${esc(m.tipo)}</span><br>`:""}${esc(m.text)}<small>${m.from==="c"?"Coordinatrice":esc(s?.n)} · ${esc(m.t)}</small></div>`).join("")||'<p class="muted small">Nessun messaggio ancora.</p>'}</div>
+    <form class="compose" data-form="msg">
+      ${me==="s"?`<div class="field"><label for="msg-tipo">Argomento</label><select id="msg-tipo">${["Domanda","Assenza","Cambio turno","Documenti","Altro"].map(x=>`<option>${x}</option>`).join("")}</select></div>`:""}
+      <div class="field"><label for="msg-text">${me==="s"?"Messaggio":"Rispondi"}</label><textarea id="msg-text" maxlength="1000" placeholder="${me==="s"?"Scrivi alla coordinatrice…":"Scrivi una risposta…"}"></textarea></div>
+      <div class="btn-row"><button class="btn" type="submit">Invia</button></div>
+    </form>`;
+}
+
+C.idee = () => `<div class="card"><h2>Possibili sviluppi del progetto</h2>
+  <p class="muted" style="margin-top:6px;max-width:68ch">Idee per rendere lo smistamento più equo e il portale più utile. <span class="tag q">rapida</span> si aggiunge con poco lavoro, <span class="tag m">media</span> richiede integrazioni o dati in più.</p></div>
+  <div class="ideas">${[
+  ["Equità e trasparenza", [
+    ["Motivazione visibile e ricorso","Ogni assegnazione mostra criteri e punteggio, con possibilità di chiedere una revisione entro 48 ore.","q"],
+    ["Merito non solo media","Aggiungere CFU in regola con il piano di studi e la valutazione dei tutor nei tirocini precedenti.","q"],
+    ["Precedenze tutelate","Legge 104, studenti lavoratori o genitori: priorità sulla vicinanza, visibile solo al coordinatore (GDPR).","m"],
+    ["Ottimizzazione globale","Un algoritmo di assegnazione ottima (es. metodo ungherese) che massimizza la soddisfazione di tutto il gruppo.","m"]]],
+  ["Per gli studenti", [
+    ["Preferenze espresse","Lo studente indica fino a 3 ospedali o reparti preferiti, con un peso limitato per non scavalcare il merito.","q"],
+    ["Scambio di reparto","Due studenti chiedono lo scambio, il coordinatore approva con un clic.","q"],
+    ["Giustificativi online","Caricare il certificato medico direttamente dalla presenza mancante, senza passare dalla segreteria.","q"],
+    ["Libretto digitale delle competenze","Checklist (prelievi, medicazioni, gestione CVC, ECG) firmata dal tutor: l'algoritmo privilegia i reparti che coprono le competenze mancanti.","m"]]],
+  ["Per coordinatori e tutor", [
+    ["Controllo requisiti","Blocco automatico se mancano idoneità sanitaria, vaccinazioni o corso sicurezza (D.Lgs. 81/08).","q"],
+    ["Firma del tutor","Il tutor conferma le presenze della settimana dal suo telefono: vale come firma del libretto.","q"],
+    ["Valutazioni e feedback","Il tutor valuta lo studente, lo studente valuta la qualità didattica del reparto.","q"],
+    ["Esportazione registro","Registro presenze in Excel o PDF per la segreteria e per la commissione di fine anno.","q"]]],
+  ["Aspetti tecnici", [
+    ["Tempo di viaggio reale","Calcolare i minuti con i mezzi pubblici invece dei km, importante per chi non ha l'auto.","m"],
+    ["Accesso con credenziali d'ateneo","Login con SSO universitario o SPID e ruoli separati: studente, tutor, coordinatore.","m"],
+    ["Import dalla segreteria","Media ed esami letti dal sistema dell'ateneo (es. Esse3) invece che inseriti a mano.","m"],
+    ["Notifiche","Email o notifica push quando esce l'assegnazione, arriva un messaggio o manca una timbratura.","q"]]]
+  ].map(([g,list])=>`<div class="card"><h2 style="margin-bottom:14px">${g}</h2><ul>${list.map(([t,d,k])=>`<li><b>${t}<span class="tag ${k}">${k==="q"?"rapida":"media"}</span></b><span>${d}</span></li>`).join("")}</ul></div>`).join("")}</div>`;
+
+// ================= Viste studente =================
+const P = {};
+function calendar(sid){
+  const lead = (new Date(DAYS[0]+"T12:00:00Z").getUTCDay()+6)%7;
+  return `<div class="cal">${["L","M","M","G","V"].map(x=>`<span>${x}</span>`).join("")}${"<i></i>".repeat(lead)}
+    ${DAYS.map(d=>{const a=rec(sid,d), c = d>TODAY?"":!a?(d<TODAY?"a":""):isLate(a)?"l":"p";
+      return `<i class="${c} ${d===TODAY?"t":""}" title="${fmtDay(d)}: ${d>TODAY?"da svolgere":status(a,d)[0]}">${+d.slice(8)}</i>`}).join("")}</div>
+    <div class="legend"><span><i style="background:var(--light-soft)"></i>Presente</span><span><i style="background:var(--warn-soft)"></i>Ritardo</span><span><i style="background:var(--heavy-soft)"></i>Assente</span><span><i style="background:var(--bg);outline:2px solid var(--accent);outline-offset:-2px"></i>Oggi</span></div>`;
+}
+P.home = () => {
+  const s = student(st.me), r = mine(st.me), sm = summary(st.me), a = rec(st.me,TODAY);
+  if (s.erasmus) return `<div class="card hero"><p class="label">${ANNI[s.anno].label}</p><div class="ward">Erasmus · ${esc(s.erasmus)}</div><p class="muted">In questo periodo sei in mobilità Erasmus: il tirocinio e le ore si registrano con l'università ospitante.</p></div>`;
+  if (!r?.w) return `<div class="card"><h2>In attesa di assegnazione</h2><p class="muted" style="margin-top:6px">La coordinatrice non ha ancora pubblicato il tuo reparto per questo periodo.</p></div>`;
+  const o = oreAnno(s);
+  return `<div class="grid2">
+    <div class="card hero">
+      <p class="label">Il tuo reparto, 9 nov – 18 dic 2026</p>
+      <div><div class="ward">${esc(r.w.a)}</div><p class="muted">${esc(H[r.w.h].n)} · ${TYPE[r.w.a]==="P"?"reparto pesante":"reparto leggero"}</p></div>
+      <dl class="kv"><dt>Turno</dt><dd>07:00 – 14:00, lunedì–venerdì</dd><dt>Tutor</dt><dd>${esc(r.w.tutor)}</dd><dt>Distanza</dt><dd class="num">${r.f.d==null?"Domicilio non indicato":`${r.f.d} km da ${esc(s.com)}`}</dd><dt>Graduatoria</dt><dd class="num">${r.rank}ª su ${S.filter(x=>x.anno===s.anno&&!x.erasmus).length}</dd></dl>
+      <div class="why"><b>Perché ti è stato assegnato</b><div class="chips">${reasons(r.f)}</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card"><div class="card-h"><h2>Oggi</h2><span class="muted small">${fmtDay(TODAY,{weekday:"long",day:"numeric",month:"long"})}</span></div>
+        <p style="margin-bottom:12px">${!a?"Non hai ancora registrato l'entrata.":!a.out?`Entrata alle <b class="num">${a.in}</b>. Ricordati di scansionare il QR all'uscita.`:`Turno completato: ${a.in} – ${a.out}.`}</p>
+        <button class="btn" data-go="presenze">${!a?"Registra entrata":!a.out?"Registra uscita":"Vedi le presenze"}</button></div>
+      <div class="card"><div class="card-h"><h2>Ore di tirocinio</h2><span class="num score">${Math.round(sm.ore)} / ${ORE_TARGET} h</span></div>
+        <div class="bar wide"><i style="width:${Math.min(100,sm.ore/ORE_TARGET*100)}%"></i></div>
+        <p class="muted small num" style="margin-top:8px">${sm.giorni} turni svolti · ${sm.assenze} assenze · ${sm.ritardi} ritardi</p>
+        ${s.ore!=null?`<p class="small num" style="margin-top:8px">Nell'anno: <b>${s.ore}${ANNI[s.anno].monte?` / ${ANNI[s.anno].monte}`:""} h</b> <span class="chip ${o.c}">${o.txt}</span></p>`:""}</div>
+    </div>
+  </div>
+  ${quick([["presenze","qr","Presenze tirocinio","Timbra entrata e uscita con il QR del reparto."],["percorso","route","Il mio percorso","Reparti fatti e quelli che ti mancano."],
+           ["messaggi","chat","Scrivi alla coordinatrice","Assenze, cambi turno, documenti."],["home","home","I miei turni","Calendario del periodo qui sotto."]])}
+  <div class="card"><div class="card-h"><h2>I miei turni del periodo</h2></div>${calendar(st.me)}</div>`;
+};
+P.percorso = () => {
+  const s = student(st.me);
+  return `<div class="grid2">${studDetail(st.me,false)}
+    <div class="card"><h2 style="margin-bottom:14px">Riepilogo</h2>
+      <dl class="kv">
+        <dt>Reparti svolti</dt><dd class="num">${s.hist.length + 1} su ${AREAS.length} disponibili</dd>
+        <dt>Ospedali visti</dt><dd class="num">${new Set([...s.hist.map(h=>h[1]), mine(st.me)?.w?.h].filter(Boolean)).size} su ${Object.keys(H).length}</dd>
+        <dt>Turni nel periodo</dt><dd class="num">${summary(st.me).giorni} su ${DAYS.length}</dd>
+      </dl>
+      <p class="muted small" style="margin-top:14px">Il conteggio include il reparto in corso. Per correggere un tirocinio passato scrivi alla coordinatrice dalla sezione Messaggi.</p>
+    </div></div>`;
+};
+P.presenze = () => {
+  const r = mine(st.me), a = rec(st.me,TODAY), sm = summary(st.me);
+  const list = recs(st.me).slice().sort((x,y)=>y.d.localeCompare(x.d));
+  return `<div class="grid2">
+    <div class="card scan">
+      <p class="label">Oggi · ${fmtDay(TODAY,{weekday:"long",day:"numeric",month:"long"})}</p>
+      <p class="state">${!a?"Entrata non registrata":!a.out?`In reparto dalle ${a.in}`:`Turno completato · ${hours(a).toFixed(1)} h`}</p>
+      <p class="muted small">${r?.w?`${esc(r.w.a)} · ${esc(H[r.w.h].n)} · turno 07:00–14:00`:"Nessun reparto assegnato"}</p>
+      <button class="btn big" data-action="scan-open" ${!r?.w||a?.out?"disabled":""}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${I.qr}</svg>${!a?"Scansiona QR di entrata":!a.out?"Scansiona QR di uscita":"Turno completato"}</button>
+      <p class="muted small">Il QR è esposto all'ingresso del reparto e cambia ogni 30 secondi.</p>
+    </div>
+    <div class="card"><div class="card-h"><h2>Ore di tirocinio</h2><span class="num score">${Math.round(sm.ore)} / ${ORE_TARGET} h</span></div>
+      <div class="bar wide"><i style="width:${Math.min(100,sm.ore/ORE_TARGET*100)}%"></i></div>
+      <div style="margin-top:16px">${calendar(st.me)}</div></div>
+  </div>
+  <div class="card"><div class="card-h"><h2>Registro presenze</h2><span class="muted small">Per correggere un errore scrivi alla coordinatrice</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Giorno</th><th>Entrata</th><th>Uscita</th><th>Ore</th><th>Stato</th></tr></thead><tbody>
+    ${UPTO.slice().reverse().map(d=>{const x=rec(st.me,d),[l,c]=status(x,d);
+      return `<tr><td>${fmtDay(d)}</td><td class="num">${x?x.in:"—"}</td><td class="num">${x?.out||"—"}</td><td class="num">${x?.out?hours(x).toFixed(1):"—"}</td><td><span class="chip ${c}">${l}</span></td></tr>`}).join("")}
+    </tbody></table></div></div>`;
+};
+P.messaggi = () => { M.filter(m=>m.sid===st.me&&m.from==="c").forEach(m=>m.readS=true); return `<div class="card" style="max-width:760px">${chatBox(st.me,"s")}</div>`; };
+
+// ================= Render =================
+function render(){
+  const views = st.role==="coord" ? C : P, nav = NAV[st.role];
+  if (!views[st.view]) st.view = nav[0][0];
+  const html = views[st.view]();              // la vista segna i messaggi come letti: va calcolata prima dei badge
+  const label = nav.find(n=>n[0]===st.view)[1];
+  document.querySelectorAll("[data-role]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.role===st.role));
+  $("nav").innerHTML = nav.map(([id,l])=>`<button data-go="${id}" ${id===st.view?'aria-current="page"':""}>${l}${id==="messaggi"&&unread()?`<span class="badge">${unread()}</span>`:""}</button>`).join("");
+  $("who").innerHTML = st.role==="coord"
+    ? `<span class="avatar" aria-hidden="true">CT</span><span><b>Coordinatrice tirocini</b><br>Ufficio Tirocini · a.a. 2026/27</span>`
+    : `<span class="avatar" aria-hidden="true">${esc(student(st.me).n.split(" ").map(x=>x[0]).join("").slice(0,2))}</span><label for="login" class="muted">Accesso demo come</label><select id="login">${Object.entries(ANNI).map(([k,a])=>`<optgroup label="${a.label}">${S.filter(s=>s.anno===+k).map(s=>`<option value="${s.id}" ${s.id===st.me?"selected":""}>${esc(s.n)}</option>`).join("")}</optgroup>`).join("")}</select>`;
+  const annoVista = st.role==="coord" ? st.anno : student(st.me).anno;
+  $("period").textContent = `${ANNI[annoVista].label} · Periodo 1 · 9 nov – 18 dic 2026`;
+  $("anni").hidden = st.role!=="coord";
+  $("anni").innerHTML = Object.entries(ANNI).map(([k,a])=>`<button data-action="anno" data-v="${k}" aria-pressed="${+k===st.anno}">${a.label} <span class="num">${S.filter(s=>s.anno===+k).length}</span></button>`).join("");
+  $("eyebrow").innerHTML = `${st.role==="coord" ? "Area coordinatore" : "Area studente"} <span aria-hidden="true">/</span> <b>${label}</b>`;
+  $("title").textContent = label;
+  // dopo il ridisegno rimette il focus sullo stesso controllo (tastiera e lettori di schermo)
+  const ae = document.activeElement, key = ae?.closest?.("#view") && (ae.name ? `[name="${ae.name}"][value="${ae.value}"]` : ae.dataset.ov ? `[data-ov="${ae.dataset.ov}"]` : null);
+  $("view").innerHTML = html;
+  if (key) document.querySelector(key)?.focus();
+  if ($("qr-big")) drawQR($("qr-big"), qrToken(st.qrWard), 168), $("qr-token").textContent = qrToken(st.qrWard);
+  if ($("chat")) $("chat").scrollTop = $("chat").scrollHeight;
+}
+
+// ================= Eventi =================
+document.addEventListener("click", e => {
+  const go = e.target.closest("[data-go]"), role = e.target.closest("[data-role]"), act = e.target.closest("[data-action]");
+  if (go){ st.view = go.dataset.go; render(); scrollTo({top:0}); return; }
+  if (role){ st.role = role.dataset.role; st.view = NAV[st.role][0][0]; st.editing = null; render(); return; }
+  if (!act) return;
+  const sid = act.dataset.sid;
+  switch (act.dataset.action){
+    case "step": st.step = +act.dataset.n; st.editRow = null; st.confirm = false; render(); scrollTo({top:0}); break;
+    case "reset-crit": Object.assign(st.W, DEFAULT); render(); break;
+    case "filter": st.filter = act.dataset.v; render(); break;
+    case "edit-row": st.editRow = sid; render(); document.querySelector(`[data-ov="${sid}"]`)?.focus(); break;
+    case "cancel-row": st.editRow = null; render(); break;
+    case "reset-row": delete st.ov[sid]; render(); break;
+    case "publish": st.confirm = true; render(); break;
+    case "cancel-pub": st.confirm = false; render(); break;
+    case "confirm-pub": {
+      const now = new Date();
+      st.pub[st.anno] = {sig:sig(), at:`oggi alle ${hm(now.getHours()*60+now.getMinutes())}`}; st.confirm = false;
+      render(); toast("Assegnazione pubblicata: gli studenti ricevono una notifica (simulazione)."); break;
+    }
+    case "sel-stud": st.sel = sid; st.editing = null; render(); break;
+    case "edit-stud": { const s = student(sid); st.editing = {id:s.id,n:s.n,m:s.m,media:s.media,com:s.com,anno:s.anno,hist:s.hist.map(h=>[...h])}; render(); break; }
+    case "new-stud": st.editing = {id:null,n:"",m:"",media:"",com:"",anno:st.anno,hist:[]}; render(); $("f-n").focus(); break;
+    case "anno": st.anno = +act.dataset.v; st.editing = null; st.editRow = null; st.confirm = false; st.open = null; render(); break;
+    case "cancel-edit": st.editing = null; render(); break;
+    case "add-hist": readForm(); st.editing.hist.push(["Medicina Interna","H1"]); render(); break;
+    case "del-hist": readForm(); st.editing.hist.splice(+act.dataset.k,1); render(); break;
+    case "day": st.day = UPTO[UPTO.indexOf(st.day) + +act.dataset.step] || st.day; render(); break;
+    case "mark": A.push({sid, d:st.day, w:mine(sid)?.w?.id, in:"07:00", out:st.day===TODAY?null:"14:00", via:"manuale"}); render(); toast(`Presenza inserita a mano per ${student(sid).n}.`); break;
+    case "fix-out": { const a = rec(sid,st.day); a.out = "14:00"; a.via = "manuale"; render(); toast("Uscita inserita."); break; }
+    case "open": st.open = st.open===sid ? null : sid; render(); break;
+    case "thread": st.thread = sid; render(); break;
+    case "scan-open": $("modal").hidden = false; drawQR($("scan-qr"), qrToken(mine(st.me).w.id), 150); act.blur(); document.querySelector('[data-action="scan-do"]').focus(); break;
+    case "scan-close": $("modal").hidden = true; break;
+    case "scan-do": {
+      const w = mine(st.me).w, a = rec(st.me,TODAY);
+      // shortcut: orario simulato dentro il turno, così la demo funziona a qualsiasi ora; in produzione l'orario lo mette il server
+      if (!a){ const t = hm(START-8+Math.floor(Math.random()*10)); A.push({sid:st.me,d:TODAY,w:w.id,in:t,out:null,via:"QR"}); toast(`Entrata registrata alle ${t} · ${w.a}`); }
+      else { a.out = hm(14*60+Math.floor(Math.random()*8)); toast(`Uscita registrata alle ${a.out} · ${hours(a).toFixed(1)} ore oggi`); }
+      $("modal").hidden = true; render(); break;
+    }
+  }
+});
+document.addEventListener("keydown", e => {
+  if (e.key==="Escape" && !$("modal").hidden) $("modal").hidden = true;
+  if (e.key==="Enter" && e.target.matches("tr[data-action]")) e.target.click();
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.name==="method"){ st.method = t.value; render(); }
+  else if (t.name==="order"){ st.W.merito = +t.value; render(); }
+  else if (t.name?.startsWith("lv-")){ st.W[t.name.slice(3)] = +t.value; render(); }
+  else if (t.dataset.ov){
+    // in manuale "nessun reparto" = nessuna scelta; in automatico è una scelta esplicita del coordinatore
+    if (!t.value && st.method==="manual") delete st.ov[t.dataset.ov]; else st.ov[t.dataset.ov] = t.value;
+    if (st.method==="auto") st.editRow = null;
+    render();
+  }
+  else if (t.id==="day"){ st.day = t.value; render(); }
+  else if (t.id==="qr-ward"){ st.qrWard = t.value; render(); }
+  else if (t.id==="login"){ st.me = t.value; render(); }
+});
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target.dataset.form;
+  if (f==="stud") saveForm();
+  if (f==="msg"){
+    const text = $("msg-text").value.trim();
+    if (!text){ $("msg-text").focus(); return; }
+    const now = new Date(), t = "oggi, " + hm(now.getHours()*60+now.getMinutes());
+    if (st.role==="stud") M.push({sid:st.me,from:"s",tipo:$("msg-tipo").value,text,t,readC:false,readS:true});
+    else M.push({sid:st.thread,from:"c",text,t,readC:true,readS:false});
+    render(); toast(st.role==="stud" ? "Messaggio inviato alla coordinatrice." : "Risposta inviata.");
+  }
+});
+// QR che si rinnova ogni 30 secondi
+let lastTok = "";
+setInterval(() => {
+  if (!$("qr-count")) return;
+  $("qr-count").textContent = 30 - Math.floor(Date.now()/1000) % 30;
+  const tok = qrToken(st.qrWard);
+  if (tok!==lastTok){ lastTok = tok; drawQR($("qr-big"), tok, 168); $("qr-token").textContent = tok; }
+}, 1000);
+
+render();
+</script>
+</body>
+</html>
