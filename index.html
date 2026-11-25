@@ -52,7 +52,10 @@ a{color:var(--accent)}
 .req input{accent-color:var(--light);width:17px;height:17px;flex:none}
 .req input:disabled{cursor:default}
 .login{max-width:860px;margin:24px auto 0;display:flex;flex-direction:column;gap:22px}
-.login-choices{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.login-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.qr-screen{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;border-top:3px solid var(--brand)}
+.qr-screen:fullscreen{justify-content:center;border-radius:0}
+@media (max-width:900px){.login-choices{grid-template-columns:1fr 1fr}}
 .login-choices .qcard{padding:26px}
 .login-choices .qcard b{font-size:1.25rem}
 .login-form{max-width:440px;width:100%;margin:24px auto 0;display:flex;flex-direction:column;gap:14px;border-top:3px solid var(--brand)}
@@ -579,6 +582,7 @@ const I = {
 };
 const NAV = {
   coord:[["panoramica","Panoramica","grid"],["assegnazione","Assegnazione","sliders"],["calendario","Calendario","cal"],["studenti","Studenti","people"],["reparti","Reparti","hosp"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"],["idee","Idee e sviluppi","idea"]],
+  caposala:[["qr","QR presenze","qr"]],
   stud:[["home","La mia assegnazione","home"],["percorso","Il mio percorso","route"],["preferenze","Le mie preferenze","hosp"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"]]
 };
 
@@ -632,7 +636,7 @@ const LEVELS = [[10,"Poco"],[20,"Abbastanza"],[30,"Molto"]];
 const used = R => R.reduce((o,r)=>(r.w && (o[r.w.id]=(o[r.w.id]||0)+1), o), {});
 const issues = (r,u) => r.blocked ? [`Non assegnabile: manca ${reqMancanti(r.s).map(([,l])=>l.split(" (")[0].toLowerCase()).join(", ")}`]
   : !r.w ? ["Senza reparto"]
-  : [!r.f.adatto && `Troppo complesso per il ${ANNI[r.s.anno].label} (livello ${r.f.liv})`, r.f.done && "Ripete un reparto già fatto", u[r.w.id]>r.w.posti && "Reparto oltre i posti", r.f.d>30 && `Lontano da casa (${r.f.d} km)`].filter(Boolean);
+  : [!r.f.adatto && `Livello ${r.f.liv}, sopra il ${ANNI[r.s.anno].label}: scelta del coordinatore`, r.f.done && "Ripete un reparto già fatto", u[r.w.id]>r.w.posti && "Reparto oltre i posti", r.f.d>30 && `Lontano da casa (${r.f.d} km)`].filter(Boolean);
 const sig = () => JSON.stringify(assignment().map(r=>[r.s.id, r.w?.id]));
 
 C.assegnazione = () => {
@@ -667,7 +671,7 @@ function stepCriteria(){
         <p class="muted small">L'ordine dei criteri è quello delle linee guida nazionali (Conferenza Permanente delle Professioni Sanitarie, 2025) e non si modifica.</p>
         <ol class="steps" style="margin-top:14px">
           <li><span><b>Requisiti obbligatori</b>Visita di sorveglianza sanitaria, corso sicurezza e laboratori propedeutici. Chi non li ha non viene assegnato.</span></li>
-          <li><span><b>Bisogni di apprendimento e complessità crescente</b>Prima un reparto mai frequentato, poi la complessità adatta all'anno (I anno solo livello 1, II fino al 2, III fino al 3, con priorità all'area critica) e un contesto nuovo. Sceglie per primo chi ha più reparti ancora da fare.</span></li>
+          <li><span><b>Bisogni di apprendimento e complessità crescente</b>Prima un reparto mai frequentato, poi la complessità adatta all'anno (I anno solo livello 1, II fino al 2, III fino al 3, con priorità all'area critica; a mano puoi assegnare anche l'area critica a chiunque) e un contesto nuovo. Sceglie per primo chi ha più reparti ancora da fare.</span></li>
           <li><span><b>Posti e Guide disponibili</b>Ogni Guida segue al massimo 2 studenti.</span></li>
           <li><span><b>Preferenze dello studente</b>Fino a 3 scelte tra ospedali e reparti, la distanza da casa e chi non ha l'auto. Contano sempre meno dei bisogni di apprendimento.</span></li>
         </ol>
@@ -702,7 +706,7 @@ function stepReview(){
   const options = r => { const uu = {...u}; if (r.w) uu[r.w.id]--;
     return `<option value="">— Nessun reparto —</option>` + Object.entries(H).map(([hid,h])=>`<optgroup label="${h.n}">${WARDS.filter(w=>w.h===hid).map(w=>{
       const free = w.posti-(uu[w.id]||0), troppo = LIV[w.a] > r.s.anno;
-      return `<option value="${w.id}" ${r.w?.id===w.id?"selected":""} ${troppo?"disabled":""}>${esc(w.a)} · ${troppo?`livello ${LIV[w.a]}, non adatto all'anno`:free>0?`${free} ${free===1?"posto libero":"posti liberi"}`:"pieno"}</option>`;}).join("")}</optgroup>`).join(""); };
+      return `<option value="${w.id}" ${r.w?.id===w.id?"selected":""}>${esc(w.a)} · ${free>0?`${free} ${free===1?"posto libero":"posti liberi"}`:"pieno"}${troppo?` · livello ${LIV[w.a]}, sopra l'anno`:""}</option>`;}).join("")}</optgroup>`).join(""); };
   const fine = r => [r.f.done?"":"Reparto nuovo", r.f.seen?"ospedale già visto":"ospedale nuovo", r.f.d==null?"domicilio non indicato":`${r.f.d} km da casa`, r.f.prefIdx>=0?`${r.f.prefIdx+1}ª preferenza accolta`:""].filter(Boolean).join(" · ");
 
   return `<div class="review">
@@ -921,7 +925,7 @@ C.presenze = () => {
         </div></div>
     </div>
     <div class="card"><h2 style="margin-bottom:14px">Come funziona la presenza</h2><ol class="steps">
-      <li><span><b>Arrivo in reparto</b>Lo studente apre il portale sul telefono e scansiona il QR esposto all'ingresso.</span></li>
+      <li><span><b>Arrivo in reparto</b>Il caposala mostra all'ingresso il QR del reparto dal suo profilo; lo studente lo scansiona dal suo portale.</span></li>
       <li><span><b>Controlli automatici</b>Il codice deve essere valido, del reparto assegnato a quello studente e scansionato vicino all'ospedale.</span></li>
       <li><span><b>Entrata e uscita</b>La prima scansione del giorno registra l'entrata, la seconda l'uscita. Le ore si calcolano da sole.</span></li>
       <li><span><b>Verifica</b>Il coordinatore vede tutto qui per nome. Ritardi e uscite mancanti vengono segnalati e si correggono a mano.</span></li>
@@ -1104,19 +1108,55 @@ P.presenze = () => {
 };
 P.messaggi = () => { M.filter(m=>m.sid===st.me&&m.from==="c").forEach(m=>m.readS=true); return `<div class="card" style="max-width:760px">${chatBox(st.me,"s")}</div>`; };
 
+// ================= Vista caposala =================
+// Il caposala mostra all'ingresso il QR del suo reparto (cambia ogni 30 s); lo studente lo scansiona dal suo portale.
+const K = {};
+K.qr = () => {
+  const w = WARDS.find(x=>x.id===st.qrWard);
+  const attesi = [1,2,3].flatMap(a=>assignment(a)).filter(r=>r.w?.id===w.id).map(r=>({s:r.s, a:rec(r.s.id,TODAY)}));
+  const dentro = attesi.filter(x=>x.a && !x.a.out).length, usciti = attesi.filter(x=>x.a?.out).length;
+  return `<div class="grid2">
+    <div class="card qr-screen" id="qr-screen">
+      <p class="label">${esc(H[w.h].f)} · ${H[w.h].city}</p>
+      <h2 style="font-size:1.6rem">${esc(w.a)}</h2>
+      <div class="qrbox"><div id="qr-big" data-size="260"></div></div>
+      <p>Studenti: scansionate questo codice dal vostro portale <b>all'entrata e all'uscita</b>.</p>
+      <p class="muted small">Il codice cambia tra <b class="num" id="qr-count">30</b> s · <span class="token" id="qr-token"></span></p>
+      <button class="btn ghost sm" data-action="fullscreen">Schermo intero</button>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Studenti di oggi</h2><span class="muted small">${fmtDay(TODAY,{weekday:"long",day:"numeric",month:"long"})}</span></div>
+      <div class="chips" style="margin-bottom:12px"><span class="chip good">In reparto ${dentro}</span><span class="chip ok">Usciti ${usciti}</span><span class="chip">Attesi ${attesi.length}</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Studente</th><th>Anno</th><th>Entrata</th><th>Uscita</th></tr></thead><tbody>
+      ${attesi.map(({s,a})=>`<tr><td><b style="font-weight:600">${esc(s.n)}</b></td><td class="small">${ANNI[s.anno].label}</td>
+        <td class="num">${a ? a.in + (isLate(a)?' <span class="chip bad">ritardo</span>':"") : '<span class="muted">non ancora arrivato</span>'}</td><td class="num">${a?.out||"—"}</td></tr>`).join("")
+        || `<tr><td colspan="4" class="muted">Nessuno studente assegnato a questo reparto nel periodo in corso.</td></tr>`}
+      </tbody></table></div>
+      <p class="muted small" style="margin-top:12px">La timbratura vale solo se lo studente è assegnato a questo reparto e il codice è quello attuale: una foto del QR inviata a chi non è in reparto scade dopo 30 secondi.</p>
+    </div>
+  </div>`;
+};
+
 // ================= Accesso =================
 // shortcut: accesso solo dimostrativo, la password non viene verificata. Il metodo vero (SSO d'ateneo, SPID…) è da decidere.
 const COORD = {user:"michele.massaro", n:"Michele Massaro"};
 function loginView(){
   const icon = ic => `<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[ic]}</svg></span>`;
   const note = `<p class="muted small">Accesso dimostrativo: la password non viene ancora verificata. Il sistema di accesso definitivo è da decidere.</p>`;
+  const back = `<button type="button" class="linkbtn" data-action="login-back">← Cambia profilo</button>`;
   if (!st.loginAs) return `<div class="login">
     <div><h1>Accedi al portale tirocini</h1><p class="muted" style="margin-top:6px">Corso di Laurea in Infermieristica · ospedali di Barletta, Andria e Bisceglie. Scegli il tuo profilo.</p></div>
     <div class="login-choices">
       <button class="qcard" data-action="login-as" data-as="coord">${icon("sliders")}<b>Coordinatore</b><span>Assegnazione dei reparti, studenti, presenze e messaggi per tutti e tre gli anni.</span><em>Accedi come coordinatore →</em></button>
       <button class="qcard" data-action="login-as" data-as="stud">${icon("people")}<b>Studente</b><span>Il tuo reparto, la timbratura con il QR, le tue ore e i messaggi al coordinatore.</span><em>Accedi come studente →</em></button>
+      <button class="qcard" data-action="login-as" data-as="caposala">${icon("qr")}<b>Caposala</b><span>Mostra all'ingresso del reparto il QR che gli studenti scansionano per entrata e uscita.</span><em>Accedi come caposala →</em></button>
     </div></div>`;
-  const back = `<button type="button" class="linkbtn" data-action="login-back">← Cambia profilo</button>`;
+  if (st.loginAs==="caposala") return `<form class="card login-form" data-form="login" novalidate>
+    ${back}<div><p class="label">Reparto</p><h2>Accesso caposala</h2></div>
+    <div class="field"><label for="l-rep">Il tuo reparto</label><select id="l-rep"><option value="">Scegli il reparto…</option>${Object.entries(H).map(([hid,h])=>`<optgroup label="${h.f} · ${h.city}">${WARDS.filter(w=>w.h===hid).map(w=>`<option value="${w.id}">${esc(w.a)}</option>`).join("")}</optgroup>`).join("")}</select></div>
+    <div class="field"><label for="l-pass">Password</label><input id="l-pass" type="password" autocomplete="off"></div>
+    <p class="err" id="l-err" hidden></p>
+    <button class="btn wide" type="submit">Accedi</button>${note}</form>`;
   if (st.loginAs==="coord") return `<form class="card login-form" data-form="login" novalidate>
     ${back}<div><p class="label">Area coordinatore</p><h2>Accesso coordinatore</h2></div>
     <div class="field"><label for="l-user">Nome utente</label><input id="l-user" value="${COORD.user}" autocomplete="off"></div>
@@ -1136,12 +1176,15 @@ function doLogin(){
   const err = t => { $("l-err").textContent = t; $("l-err").hidden = false; };
   if (st.loginAs==="coord"){
     if ($("l-user").value.trim().toLowerCase() !== COORD.user) return err(`Nome utente non riconosciuto. Per la demo usa ${COORD.user}.`);
+  } else if (st.loginAs==="caposala"){
+    if (!$("l-rep").value) return err("Scegli il tuo reparto.");
   } else if (!$("l-stud").value) return err("Scegli il tuo nome dall'elenco.");
   if (!$("l-pass").value) return err("Inserisci la password.");
   if (st.loginAs==="stud") st.me = $("l-stud").value;
+  if (st.loginAs==="caposala") st.qrWard = $("l-rep").value;
   st.role = st.loginAs; st.view = NAV[st.role][0][0]; st.editing = null;
   render(); scrollTo({top:0});
-  toast(st.role==="coord" ? `Benvenuto, ${COORD.n}.` : `Ciao ${student(st.me).n}, accesso effettuato.`);
+  toast(st.role==="coord" ? `Benvenuto, ${COORD.n}.` : st.role==="caposala" ? `Accesso al reparto ${WARDS.find(w=>w.id===st.qrWard).a}.` : `Ciao ${student(st.me).n}, accesso effettuato.`);
 }
 
 // ================= Render =================
@@ -1149,26 +1192,28 @@ function render(){
   const out = !st.role;
   document.querySelector(".navbar").hidden = out; document.querySelector("header.top").hidden = out;
   if (out){ $("who").innerHTML = ""; $("view").innerHTML = loginView(); return; }
-  const views = st.role==="coord" ? C : P, nav = NAV[st.role];
+  const views = {coord:C, stud:P, caposala:K}[st.role], nav = NAV[st.role];
   if (!views[st.view]) st.view = nav[0][0];
   const html = views[st.view]();              // la vista segna i messaggi come letti: va calcolata prima dei badge
   const label = nav.find(n=>n[0]===st.view)[1];
   $("nav").innerHTML = nav.map(([id,l])=>`<button data-go="${id}" ${id===st.view?'aria-current="page"':""}>${l}${id==="messaggi"&&unread()?`<span class="badge">${unread()}</span>`:""}</button>`).join("");
   const exit = `<button class="btn ghost sm" data-action="logout">Esci</button>`;
+  const rep = WARDS.find(w=>w.id===st.qrWard);
   $("who").innerHTML = st.role==="coord"
     ? `<span class="avatar" aria-hidden="true">MM</span><span><b>${COORD.n}</b><br>Coordinatore tirocini · a.a. 2026/27</span>${exit}`
+    : st.role==="caposala"
+    ? `<span class="avatar" aria-hidden="true">CS</span><span><b>Caposala · ${esc(rep.a)}</b><br>${esc(H[rep.h].f)} · ${H[rep.h].city}</span>${exit}`
     : `<span class="avatar" aria-hidden="true">${esc(student(st.me).n.split(" ").map(x=>x[0]).join("").slice(0,2))}</span><span><b>${esc(student(st.me).n)}</b><br>Studente · ${ANNI[student(st.me).anno].label}</span>${exit}`;
-  const annoVista = st.role==="coord" ? st.anno : student(st.me).anno;
-  $("period").textContent = `${ANNI[annoVista].label} · Periodo 1 · ${PERIODO}`;
+  $("period").textContent = st.role==="caposala" ? `Periodo in corso · ${PERIODO}` : `${ANNI[st.role==="coord" ? st.anno : student(st.me).anno].label} · Periodo 1 · ${PERIODO}`;
   $("anni").hidden = st.role!=="coord" || st.view==="calendario";   // il calendario mostra tutti e tre gli anni
   $("anni").innerHTML = Object.entries(ANNI).map(([k,a])=>`<button data-action="anno" data-v="${k}" aria-pressed="${+k===st.anno}">${a.label} <span class="num">${S.filter(s=>s.anno===+k).length}</span></button>`).join("");
-  $("eyebrow").innerHTML = `${st.role==="coord" ? "Area coordinatore" : "Area studente"} <span aria-hidden="true">/</span> <b>${label}</b>`;
+  $("eyebrow").innerHTML = `${{coord:"Area coordinatore", stud:"Area studente", caposala:"Area reparto"}[st.role]} <span aria-hidden="true">/</span> <b>${label}</b>`;
   $("title").textContent = label;
   // dopo il ridisegno rimette il focus sullo stesso controllo (tastiera e lettori di schermo)
   const ae = document.activeElement, key = ae?.closest?.("#view") && (ae.name ? `[name="${ae.name}"][value="${ae.value}"]` : ae.dataset.ov ? `[data-ov="${ae.dataset.ov}"]` : null);
   $("view").innerHTML = html;
   if (key) document.querySelector(key)?.focus();
-  if ($("qr-big")) drawQR($("qr-big"), qrToken(st.qrWard), 168), $("qr-token").textContent = qrToken(st.qrWard);
+  if ($("qr-big")) drawQR($("qr-big"), qrToken(st.qrWard), +$("qr-big").dataset.size || 168), $("qr-token").textContent = qrToken(st.qrWard);
   if ($("chat")) $("chat").scrollTop = $("chat").scrollHeight;
 }
 
@@ -1181,6 +1226,7 @@ document.addEventListener("click", e => {
   switch (act.dataset.action){
     case "login-as": st.loginAs = act.dataset.as; render(); (document.querySelector("#l-pass,#l-stud"))?.focus(); break;
     case "login-back": st.loginAs = null; render(); break;
+    case "fullscreen": $("qr-screen")?.requestFullscreen?.().catch(() => toast("Schermo intero non disponibile su questo dispositivo.")); break;
     case "add-per": PERIODI.push({id:"p"+Date.now(), anno:+act.dataset.anno, dal:"", al:""}); render(); break;
     case "del-per": PERIODI.splice(PERIODI.findIndex(p=>p.id===act.dataset.id),1); render(); toast("Periodo rimosso."); break;
     case "add-ses": SESSIONI.push({id:"e"+Date.now(), nome:"Nuova sessione", dal:"", al:""}); render(); break;
@@ -1267,7 +1313,7 @@ setInterval(() => {
   if (!$("qr-count")) return;
   $("qr-count").textContent = 30 - Math.floor(Date.now()/1000) % 30;
   const tok = qrToken(st.qrWard);
-  if (tok!==lastTok){ lastTok = tok; drawQR($("qr-big"), tok, 168); $("qr-token").textContent = tok; }
+  if (tok!==lastTok){ lastTok = tok; drawQR($("qr-big"), tok, +$("qr-big").dataset.size || 168); $("qr-token").textContent = tok; }
 }, 1000);
 
 render();

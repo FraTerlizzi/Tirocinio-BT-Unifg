@@ -8,7 +8,7 @@ Prototipo di portale per organizzare i tirocini del **Corso di Laurea in Infermi
 È una demo statica: una pagina HTML senza server e senza database. Quello che si modifica resta in memoria fino al ricaricamento.
 
 ## Cosa fa
-- **Schermata di accesso** con due profili, Coordinatore (Michele Massaro) e Studente, ognuno con la sua homepage. Per ora l'accesso è solo dimostrativo: la password non viene verificata e il metodo definitivo è da decidere.
+- **Schermata di accesso** con tre profili, ognuno con la sua homepage: Coordinatore (Michele Massaro), Studente e Caposala. Il caposala mostra all'ingresso il QR del suo reparto, che cambia ogni 30 secondi; lo studente lo scansiona per entrata e uscita. Per ora l'accesso è solo dimostrativo: la password non viene verificata e il metodo definitivo è da decidere.
 - **Area coordinatore**, divisa per anno di corso (I, II, III anno):
   - panoramica;
   - assegnazione dei reparti in 3 passi (automatica o manuale), nell'ordine delle linee guida 2025: requisiti obbligatori, poi bisogni di apprendimento, poi posti e Guide, infine preferenze dello studente. La media (inserita dal coordinatore) serve solo per i pari merito;
