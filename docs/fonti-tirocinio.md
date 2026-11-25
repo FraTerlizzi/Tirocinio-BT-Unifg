@@ -1,4 +1,4 @@
-# Fonti per la logica di TurnoGiusto
+# Fonti per la logica del Gestionale di Tirocinio
 
 Riassunto dei documenti forniti il 25/11/2026. Gli originali restano in locale e non sono nel repository.
 Qui ci sono solo le regole utili all'app. **Il file delle ore contiene nomi e matricole reali: non va mai copiato nella demo.**

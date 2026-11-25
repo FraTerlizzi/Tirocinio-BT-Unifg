@@ -1,4 +1,4 @@
-# Tirocinio-BT-Unifg
+# Gestionale di Tirocinio
 
 Prototipo di portale per organizzare i tirocini del **Corso di Laurea in Infermieristica** negli ospedali della provincia BAT:
 - Ospedale "Mons. R. Dimiccoli" di Barletta;
@@ -12,6 +12,8 @@ Prototipo di portale per organizzare i tirocini del **Corso di Laurea in Infermi
 - **Area coordinatore**, divisa per anno di corso (I, II, III anno):
   - panoramica;
   - assegnazione dei reparti in 3 passi (automatica o manuale), nell'ordine delle linee guida 2025: requisiti obbligatori, poi bisogni di apprendimento, poi posti e Guide, infine preferenze dello studente. La media (inserita dal coordinatore) serve solo per i pari merito;
+  - calendario dei periodi e delle sessioni d'esame, con i controlli della Consensus 2025: 4–6 settimane, niente sovrapposizioni con gli esami, 5–6 esperienze nel triennio;
+  - livelli di complessità dei reparti (1 base, 2 intermedio, 3 area critica): il I anno va solo al livello 1, il II fino al 2, il III fino al 3. La classificazione è una proposta da validare;
   - requisiti per studente (visita di sorveglianza sanitaria, corso sicurezza, laboratori propedeutici): chi non li ha non viene assegnato;
   - gestione studenti;
   - reparti con Guide e posti;

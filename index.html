@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TurnoGiusto Tirocini</title>
+<title>Gestionale di Tirocinio</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600;700&display=swap">
@@ -44,6 +44,8 @@ a{color:var(--accent)}
 .slim .in{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;min-height:38px}
 .slim .crumbs{font-weight:600;letter-spacing:.02em;text-transform:uppercase}
 .slim .crumbs span{opacity:.7;margin:0 6px}
+.cal-grid{display:flex;flex-direction:column;gap:20px}
+.date-in{padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);font-variant-numeric:tabular-nums}
 .reqs{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .req{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:6px;font-size:.92rem;cursor:pointer}
 .req.on{background:var(--light-soft);border-color:transparent}
@@ -111,9 +113,10 @@ main{min-width:0;padding-block:22px 64px}
 .dot.ok{background:var(--light)}
 
 .chip{display:inline-flex;align-items:center;gap:6px;padding:1px 8px;border-radius:4px;font-size:.82rem;font-weight:600;white-space:nowrap;background:var(--hover);color:var(--muted)}
-.chip.P,.chip.L{background:transparent;padding:0;color:var(--ink);font-weight:400}
-.chip.P::before,.chip.L::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--heavy);flex:none}
-.chip.L::before{background:var(--light)}
+.chip.l1,.chip.l2,.chip.l3{background:transparent;padding:0;color:var(--ink);font-weight:400}
+.chip.l1::before,.chip.l2::before,.chip.l3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--light);flex:none}
+.chip.l2::before{background:var(--accent)}
+.chip.l3::before{background:var(--heavy)}
 .chip.good{background:var(--accent-soft);color:var(--accent)}
 .chip.ok{background:var(--light-soft);color:var(--light)}
 .chip.bad{background:var(--warn-soft);color:var(--warn)}
@@ -312,7 +315,7 @@ td select,.field input,.field select,.field textarea{padding:8px 10px;border-rad
 <header class="head"><div class="in">
   <div class="brand">
     <div class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg></div>
-    <div><b>TurnoGiusto</b><small>Portale tirocini · Barletta · Andria · Bisceglie</small></div>
+    <div><b>Gestionale di Tirocinio</b><small>Portale tirocini · Barletta · Andria · Bisceglie</small></div>
   </div>
   <div class="side-foot" id="who"></div>
 </div></header>
@@ -352,11 +355,13 @@ const H = {
 const COM = {"Barletta":[0.5,1.3],"Andria":[1.6,-8.9],"Trani":[11.8,-3.3],"Bisceglie":[18.9,-7.3],"Canosa di Puglia":[-17.7,-9.4],
   "Minervino Murge":[-16.7,-24.6],"Spinazzola":[-15.7,-37.9],"Margherita di Savoia":[-10.6,7.1],"Trinitapoli":[-15.7,5.7],
   "San Ferdinando di Puglia":[-17.4,-0.6],"Corato":[11.4,-17.2],"Molfetta":[26.9,-11.9]};
-// shortcut: classificazione pesante/leggero indicativa, da validare con il coordinatore del Corso
-const TYPE = {"Anestesia e Rianimazione":"P","Cardiologia":"P","Chirurgia Generale":"P","Ematologia":"P","Pronto Soccorso e Medicina d'Urgenza":"P",
-  "Medicina Interna":"P","Nefrologia":"P","Neurologia":"P","Neurochirurgia":"P","Oncologia":"P","Ortopedia e Traumatologia":"P","Malattie Infettive":"P",
-  "Gastroenterologia":"L","Ginecologia e Ostetricia":"L","Oculistica":"L","Otorinolaringoiatria":"L","Pediatria":"L","Psichiatria (SPDC)":"L",
-  "Radioterapia Oncologica":"L","Chirurgia Plastica e Ricostruttiva":"L","Urologia":"L"};
+// Livello di complessità del reparto (Consensus 2025: complessità crescente dal 1° al 3° anno).
+// shortcut: classificazione proposta, da validare con il professore. Livello N = adatto dall'anno N in poi.
+const LIV = {"Medicina Interna":1,"Chirurgia Generale":1,"Ortopedia e Traumatologia":1,"Gastroenterologia":1,"Urologia":1,"Otorinolaringoiatria":1,
+  "Oculistica":1,"Nefrologia":1,"Chirurgia Plastica e Ricostruttiva":1,
+  "Cardiologia":2,"Neurologia":2,"Oncologia":2,"Ematologia":2,"Pediatria":2,"Ginecologia e Ostetricia":2,"Malattie Infettive":2,"Psichiatria (SPDC)":2,"Radioterapia Oncologica":2,
+  "Anestesia e Rianimazione":3,"Pronto Soccorso e Medicina d'Urgenza":3,"Neurochirurgia":3};
+const LIV_TXT = {1:"Livello 1 · base",2:"Livello 2 · intermedio",3:"Livello 3 · area critica"};
 // Reparti di degenza di ciascun ospedale (fonte: schede ospedale qsalute.it). Posti e tutor sono di esempio.
 const BIG = ["Medicina Interna","Chirurgia Generale","Pronto Soccorso e Medicina d'Urgenza","Ortopedia e Traumatologia"];
 const SUR = ["Santoro","Vitale","Fontana","Caruso","Moretti","Lombardi","Barbieri","Rinaldi","Testa","Gissi","Losito","Dellisanti","Capacchione","Musci","Lattanzio","Cognetti","Ruggiero","Paolillo","Sardella","Cuocci","Fiore","Lamonaca","Pastore"];
@@ -367,7 +372,7 @@ const WARDS = Object.entries({
       "Neurochirurgia","Neurologia","Oculistica","Ortopedia e Traumatologia","Pediatria","Urologia","Pronto Soccorso e Medicina d'Urgenza"],
   H3:["Anestesia e Rianimazione","Cardiologia","Chirurgia Generale","Ginecologia e Ostetricia","Malattie Infettive","Pronto Soccorso e Medicina d'Urgenza",
       "Medicina Interna","Ortopedia e Traumatologia","Pediatria","Psichiatria (SPDC)"]
-}).flatMap(([h,list]) => list.map(a => ({h, a, posti: BIG.includes(a) ? 4 : 2}))) // posti = Guide × 2 (rapporto max 1:2)
+}).flatMap(([h,list]) => list.map(a => ({h, a, posti: BIG.includes(a) ? 6 : 4}))) // posti = Guide × 2 (rapporto max 1:2); valori di esempio
   .map((w,i) => ({id:"w"+(i+1), ...w, tutor:`Inf. ${"ABCDFGLMNPRS"[i%12]}. ${SUR[i%SUR.length]}`}));
 const S = [
   ["Giulia Ferri","IN20481",28.7,"Barletta",[["Medicina Interna","H2"],["Pediatria","H1"]]],
@@ -418,7 +423,28 @@ const DEFAULT = {pref:20, media:true};
 
 // Calendario del periodo (lun-ven). Data "di oggi" fissa per la demo: il periodo parte oggi, registro presenze pulito.
 const TODAY = "2026-11-24";
-const DAYS = []; for (let d=new Date(TODAY+"T00:00:00Z"); d<=new Date(Date.UTC(2026,11,18)); d.setUTCDate(d.getUTCDate()+1)) { const g=d.getUTCDay(); if (g && g<6) DAYS.push(d.toISOString().slice(0,10)); }
+const DAYS = []; for (let d=new Date(TODAY+"T00:00:00Z"); d<=new Date(Date.UTC(2026,11,23)); d.setUTCDate(d.getUTCDate()+1)) { const g=d.getUTCDay(); if (g && g<6) DAYS.push(d.toISOString().slice(0,10)); }
+
+// Calendario a.a. 2026/27: periodi di tirocinio per anno e sessioni d'esame.
+// shortcut: date di esempio, da confermare con il coordinatore. Il periodo in corso (24/11–23/12) è quello usato da assegnazione e presenze.
+const PERIODI = [
+  {id:"p1",anno:1,dal:"2026-11-24",al:"2026-12-23"},{id:"p2",anno:1,dal:"2027-03-08",al:"2027-04-16"},
+  {id:"p3",anno:2,dal:"2026-11-24",al:"2026-12-23"},{id:"p4",anno:2,dal:"2027-03-01",al:"2027-04-09"},
+  {id:"p5",anno:3,dal:"2026-11-24",al:"2026-12-23"},{id:"p6",anno:3,dal:"2027-03-15",al:"2027-04-23"}];
+const SESSIONI = [
+  {id:"e1",nome:"Sessione invernale",dal:"2027-01-11",al:"2027-02-26"},
+  {id:"e2",nome:"Sessione estiva",dal:"2027-06-07",al:"2027-07-23"},
+  {id:"e3",nome:"Sessione autunnale",dal:"2027-09-01",al:"2027-09-30"}];
+const settimane = p => (Date.parse(p.al) - Date.parse(p.dal)) / 864e5 / 7 + 1/7;
+const siSovrappone = (a,b) => a.dal <= b.al && b.dal <= a.al;
+// Regole Consensus 2025: 4–6 settimane continuative, mai durante le sessioni d'esame
+function controlliPeriodo(p){
+  if (!p.dal || !p.al || p.al < p.dal) return ["Date non valide"];
+  const w = settimane(p);
+  return [w < 4 && "Meno di 4 settimane", w > 6 && "Più di 6 settimane",
+    ...SESSIONI.filter(e=>e.dal && e.al && siSovrappone(p,e)).map(e=>`Durante la ${e.nome.toLowerCase()}`),
+    PERIODI.some(q=>q!==p && q.anno===p.anno && q.dal && q.al && siSovrappone(p,q)) && "Si sovrappone a un altro periodo dello stesso anno"].filter(Boolean);
+}
 const UPTO = DAYS.filter(d=>d<=TODAY), PAST = DAYS.filter(d=>d<TODAY);
 const ORE_TARGET = DAYS.length*7, START = 7*60, TOLL = 10; // turno 07:00-14:00, ritardo oltre 10 minuti
 const fmtDay = (iso,o={weekday:"short",day:"numeric",month:"short"}) => new Date(iso+"T12:00:00Z").toLocaleDateString("it-IT",{...o,timeZone:"UTC"});
@@ -429,19 +455,26 @@ const tm = s => +s.slice(0,2)*60 + +s.slice(3,5);
 // ================= Algoritmo di assegnazione =================
 // shortcut: linea d'aria x1.25 come stima della strada; per il progetto reale usare tempi di percorrenza (API mezzi pubblici)
 const km = (s,h) => { if (!COM[s.com]) return null; const [x,y] = COM[s.com]; return Math.round(Math.hypot(x-H[h].x, y-H[h].y)*1.25); };
-const load = s => s.hist.reduce((o,[a]) => (o[TYPE[a]]++, o), {P:0,L:0});
+const livelli = s => s.hist.map(([a])=>LIV[a]).join(" · ") || "—";
+// Consensus 2025: 5–6 esperienze nel triennio, in contesti diversi (conta anche il reparto del periodo in corso)
+function esperienze(s){
+  const r = mine(s.id), aree = [...s.hist.map(h=>h[0]), ...(r?.w ? [r.w.a] : [])];
+  const doppi = aree.length - new Set(aree).size;
+  return `${aree.length} di 5–6${doppi ? ` · ${doppi} reparto ripetuto` : aree.length ? " · tutte in reparti diversi" : ""}`;
+}
 const AREAS = [...new Set(WARDS.map(w=>w.a))];
 const need = s => AREAS.filter(a => !s.hist.some(h=>h[0]===a)).length / AREAS.length;
 // Punteggio di un reparto per uno studente, nell'ordine delle linee guida 2025:
-// bisogni di apprendimento (reparto mai fatto 50, alternanza 15, contesto nuovo 10) valgono sempre più delle preferenze (max 30).
+// bisogni di apprendimento (reparto mai fatto 50, complessità piena dell'anno 15, contesto nuovo 10) valgono sempre più delle preferenze (max 30).
+// I reparti di livello superiore all'anno di corso sono esclusi (adatto = false).
 function fit(s,w,W){
   const d = km(s,w.h), done = s.hist.some(h=>h[0]===w.a), seen = s.hist.some(h=>h[1]===w.h);
-  const {P,L} = load(s), heavy = TYPE[w.a]==="P", bal = heavy ? P<=L : L<P;
+  const liv = LIV[w.a], adatto = liv <= s.anno, pieno = liv === s.anno;   // pieno = complessità proprio dell'anno
   const near = d==null ? 0.5 : 1-Math.min(d,60)/60;   // domicilio non indicato: punteggio neutro
   const prefIdx = s.pref.findIndex(p => p===w.id || p===w.h), prefScore = prefIdx<0 ? 0 : [1,.7,.4][prefIdx];
   const prefPart = s.noCar ? 0.3*prefScore + 0.7*near : 0.6*prefScore + 0.4*near;   // senza auto la distanza pesa di più
-  const score = (50*!done + 15*bal + 10*!seen + W.pref*prefPart) / (75+W.pref) * 100;
-  return {score,d,done,seen,bal,heavy,prefIdx};
+  const score = (50*!done + 15*(pieno ? 1 : 0.4) + 10*!seen + W.pref*prefPart) / (75+W.pref) * 100;
+  return {score,d,done,seen,liv,adatto,pieno,prefIdx};
 }
 // Ordine di scelta: prima chi ha più bisogni scoperti; a parità di bisogni decide la media (se attiva).
 // ov = scelte fatte a mano dal coordinatore: occupano il posto prima dell'algoritmo.
@@ -455,7 +488,7 @@ function assign(W, ov={}, anno=st.anno){
     .sort((a,b) => b.prio-a.prio || (W.media ? (b.s.media??0)-(a.s.media??0) : 0) || a.s.n.localeCompare(b.s.n))
     .map((r,i) => {
       if (r.s.id in ov){ const w = WARDS.find(x=>x.id===ov[r.s.id]); return {rank:i+1, ...r, w, f:w&&fit(r.s,w,W), best:false, manual:true}; }
-      const opts = WARDS.map(w=>({w,f:fit(r.s,w,W)})).sort((a,b)=>b.f.score-a.f.score || (a.f.d??0)-(b.f.d??0));
+      const opts = WARDS.map(w=>({w,f:fit(r.s,w,W)})).filter(o=>o.f.adatto).sort((a,b)=>b.f.score-a.f.score || (a.f.d??0)-(b.f.d??0));
       const got = opts.find(o=>left[o.w.id]>0);
       if (got) left[got.w.id]--;
       return {rank:i+1, ...r, w:got?.w, f:got?.f, best: !!got && got.f.score >= opts[0].f.score-0.01};
@@ -485,7 +518,8 @@ const M = [
 // ================= Utilità =================
 const $ = id => document.getElementById(id);
 const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const chip = (a,extra="") => `<span class="chip ${TYPE[a]}" title="${TYPE[a]==="P"?"Reparto pesante":"Reparto leggero"}">${esc(a)}${extra}</span>`;
+const chip = (a,extra="") => `<span class="chip l${LIV[a]}" title="${LIV_TXT[LIV[a]]}">${esc(a)}${extra}</span>`;
+const livChip = a => `<span class="chip l${LIV[a]}">${LIV_TXT[LIV[a]]}</span>`;
 const wardName = w => w ? `${w.a} · ${H[w.h].n}` : "—";
 const recs = sid => A.filter(a=>a.sid===sid);
 const rec = (sid,d) => A.find(a=>a.sid===sid&&a.d===d);
@@ -517,12 +551,12 @@ function reasons(f){
     f.done ? `<span class="chip bad">Reparto già svolto</span>` : `<span class="chip good">Reparto nuovo</span>`,
     f.seen ? `<span class="chip">Ospedale già visto</span>` : `<span class="chip good">Ospedale nuovo</span>`,
     f.d==null ? `<span class="chip">Domicilio non indicato</span>` : `<span class="chip ${f.d>30?"bad":""}">${f.d} km</span>`,
-    f.bal ? `<span class="chip good">Riequilibra il carico</span>` : "",
+    f.pieno ? `<span class="chip good">Complessità adatta all'anno</span>` : `<span class="chip">Livello ${f.liv}</span>`,
     f.prefIdx>=0 ? `<span class="chip ok">${f.prefIdx+1}ª preferenza</span>` : ""
   ].join("");
 }
 let tt; function toast(t){ const el=$("toast"); el.textContent=t; el.hidden=false; clearTimeout(tt); tt=setTimeout(()=>el.hidden=true,3200); }
-const qrToken = w => `TG-${w}-${TODAY.replaceAll("-","")}-${Math.floor(Date.now()/30000).toString(36).toUpperCase()}`;
+const qrToken = w => `GT-${w}-${TODAY.replaceAll("-","")}-${Math.floor(Date.now()/30000).toString(36).toUpperCase()}`;
 function drawQR(el,text,size){
   if (!el) return; el.innerHTML = "";
   if (window.QRCode) new QRCode(el,{text,width:size,height:size,colorDark:"#1D2A2E",colorLight:"#FFFFFF",correctLevel:QRCode.CorrectLevel.M});
@@ -540,10 +574,11 @@ const I = {
   chat:'<path d="M4 5h16v11H9l-5 4z"/>',
   idea:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/>',
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
-  route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h8a3 3 0 0 0 0-6H8a3 3 0 0 1 0-6h8"/>'
+  route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h8a3 3 0 0 0 0-6H8a3 3 0 0 1 0-6h8"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'
 };
 const NAV = {
-  coord:[["panoramica","Panoramica","grid"],["assegnazione","Assegnazione","sliders"],["studenti","Studenti","people"],["reparti","Reparti","hosp"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"],["idee","Idee e sviluppi","idea"]],
+  coord:[["panoramica","Panoramica","grid"],["assegnazione","Assegnazione","sliders"],["calendario","Calendario","cal"],["studenti","Studenti","people"],["reparti","Reparti","hosp"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"],["idee","Idee e sviluppi","idea"]],
   stud:[["home","La mia assegnazione","home"],["percorso","Il mio percorso","route"],["preferenze","Le mie preferenze","hosp"],["presenze","Presenze tirocinio","qr"],["messaggi","Messaggi","chat"]]
 };
 
@@ -555,8 +590,9 @@ C.panoramica = () => {
   const nuovi = ok.filter(r=>!r.f.done).length;
   const oggi = A.filter(a=>a.d===TODAY && ids.has(a.sid));
   const lastDay = PAST[PAST.length-1];
-  const nBlocc = attivi.filter(s=>!reqOk(s)).length;
+  const nBlocc = attivi.filter(s=>!reqOk(s)).length, nCal = PERIODI.filter(p=>controlliPeriodo(p).length).length;
   const alerts = [
+    ...(nCal ? [`<b>${nCal} periodi di tirocinio</b> non rispettano le regole (durata o sessioni d'esame). <button class="linkbtn" data-go="calendario">Apri Calendario</button>`] : []),
     ...(nBlocc ? [`<b>${nBlocc} studenti non assegnabili</b>: mancano visita, corso sicurezza o laboratori. <button class="linkbtn" data-go="studenti">Apri Studenti</button>`] : []),
     ...ok.filter(r=>r.f.done).map(r=>`<b>${esc(r.s.n)}</b> ripete ${esc(r.w.a)}.`),
     ...ok.filter(r=>r.f.d>30).map(r=>`<b>${esc(r.s.n)}</b>: reparto a ${r.f.d} km da casa (${esc(r.s.com)} → ${esc(H[r.w.h].n)}).`),
@@ -596,7 +632,7 @@ const LEVELS = [[10,"Poco"],[20,"Abbastanza"],[30,"Molto"]];
 const used = R => R.reduce((o,r)=>(r.w && (o[r.w.id]=(o[r.w.id]||0)+1), o), {});
 const issues = (r,u) => r.blocked ? [`Non assegnabile: manca ${reqMancanti(r.s).map(([,l])=>l.split(" (")[0].toLowerCase()).join(", ")}`]
   : !r.w ? ["Senza reparto"]
-  : [r.f.done && "Ripete un reparto già fatto", u[r.w.id]>r.w.posti && "Reparto oltre i posti", r.f.d>30 && `Lontano da casa (${r.f.d} km)`].filter(Boolean);
+  : [!r.f.adatto && `Troppo complesso per il ${ANNI[r.s.anno].label} (livello ${r.f.liv})`, r.f.done && "Ripete un reparto già fatto", u[r.w.id]>r.w.posti && "Reparto oltre i posti", r.f.d>30 && `Lontano da casa (${r.f.d} km)`].filter(Boolean);
 const sig = () => JSON.stringify(assignment().map(r=>[r.s.id, r.w?.id]));
 
 C.assegnazione = () => {
@@ -631,7 +667,7 @@ function stepCriteria(){
         <p class="muted small">L'ordine dei criteri è quello delle linee guida nazionali (Conferenza Permanente delle Professioni Sanitarie, 2025) e non si modifica.</p>
         <ol class="steps" style="margin-top:14px">
           <li><span><b>Requisiti obbligatori</b>Visita di sorveglianza sanitaria, corso sicurezza e laboratori propedeutici. Chi non li ha non viene assegnato.</span></li>
-          <li><span><b>Bisogni di apprendimento</b>Prima un reparto mai frequentato, poi l'alternanza tra reparti pesanti e leggeri e un contesto nuovo. Sceglie per primo chi ha più reparti ancora da fare.</span></li>
+          <li><span><b>Bisogni di apprendimento e complessità crescente</b>Prima un reparto mai frequentato, poi la complessità adatta all'anno (I anno solo livello 1, II fino al 2, III fino al 3, con priorità all'area critica) e un contesto nuovo. Sceglie per primo chi ha più reparti ancora da fare.</span></li>
           <li><span><b>Posti e Guide disponibili</b>Ogni Guida segue al massimo 2 studenti.</span></li>
           <li><span><b>Preferenze dello studente</b>Fino a 3 scelte tra ospedali e reparti, la distanza da casa e chi non ha l'auto. Contano sempre meno dei bisogni di apprendimento.</span></li>
         </ol>
@@ -665,8 +701,8 @@ function stepReview(){
   const Y = SY(), senzaDati = Y.filter(s=>!s.erasmus && reqOk(s) && !s.com).length, erasmus = Y.filter(s=>s.erasmus).length, bloccati = R.filter(r=>r.blocked).length;
   const options = r => { const uu = {...u}; if (r.w) uu[r.w.id]--;
     return `<option value="">— Nessun reparto —</option>` + Object.entries(H).map(([hid,h])=>`<optgroup label="${h.n}">${WARDS.filter(w=>w.h===hid).map(w=>{
-      const free = w.posti-(uu[w.id]||0);
-      return `<option value="${w.id}" ${r.w?.id===w.id?"selected":""}>${esc(w.a)} · ${free>0?`${free} ${free===1?"posto libero":"posti liberi"}`:"pieno"}</option>`;}).join("")}</optgroup>`).join(""); };
+      const free = w.posti-(uu[w.id]||0), troppo = LIV[w.a] > r.s.anno;
+      return `<option value="${w.id}" ${r.w?.id===w.id?"selected":""} ${troppo?"disabled":""}>${esc(w.a)} · ${troppo?`livello ${LIV[w.a]}, non adatto all'anno`:free>0?`${free} ${free===1?"posto libero":"posti liberi"}`:"pieno"}</option>`;}).join("")}</optgroup>`).join(""); };
   const fine = r => [r.f.done?"":"Reparto nuovo", r.f.seen?"ospedale già visto":"ospedale nuovo", r.f.d==null?"domicilio non indicato":`${r.f.d} km da casa`, r.f.prefIdx>=0?`${r.f.prefIdx+1}ª preferenza accolta`:""].filter(Boolean).join(" · ");
 
   return `<div class="review">
@@ -689,7 +725,7 @@ function stepReview(){
           <div class="who"><b>${esc(r.s.n)}</b><small class="num">media ${fmtMedia(r.s)} · ${esc(r.s.com||"domicilio —")}</small></div>
           <div class="to">${editing
             ? `<select data-ov="${r.s.id}" aria-label="Reparto per ${esc(r.s.n)}">${options(r)}</select>`
-            : r.w ? `<b>${esc(r.w.a)}</b><small>${esc(H[r.w.h].n)} · ${TYPE[r.w.a]==="P"?"pesante":"leggero"}</small>` : `<b class="muted">Nessun reparto</b>`}</div>
+            : r.w ? `<b>${esc(r.w.a)}</b><small>${esc(H[r.w.h].n)} · livello ${LIV[r.w.a]}</small>` : `<b class="muted">Nessun reparto</b>`}</div>
           <div class="note">${iss.length ? iss.map(t=>`<span class="flag">${t}</span>`).join("") : r.w ? `<span class="muted">${fine(r)}</span>` : ""}
             ${auto && !r.manual && r.w && !r.best ? `<small>Il reparto ideale era già stato preso da chi è più in alto.</small>` : ""}
             ${auto && r.manual ? `<small>Modificato a mano</small>` : ""}
@@ -730,12 +766,12 @@ C.studenti = () => {
         ? `<span><b>Segnare visita, corso sicurezza e laboratori come completi per tutti i ${daSegnare} studenti che hanno requisiti mancanti?</b> Fallo solo dopo aver controllato la documentazione.</span><div class="btn-row"><button class="btn sm" data-action="req-all">Sì, segna completi</button><button class="btn ghost sm" data-action="req-all-no">Annulla</button></div>`
         : `<span><b>${daSegnare} studenti</b> hanno requisiti mancanti o da verificare e non possono essere assegnati. Puoi spuntarli uno per uno nella scheda a destra.</span><div><button class="btn ghost sm" data-action="req-all-ask">Segna completi per tutti</button></div>`}</div>` : ""}
       <div class="tbl-wrap"><table><thead><tr><th>Studente</th><th>Requisiti</th><th>Media</th><th>Domicilio</th><th>Reparti svolti</th><th>Reparto attuale</th><th>Ore anno</th></tr></thead><tbody>
-      ${Y.map(s=>{const l=load(s), r=R.find(x=>x.s===s), o=oreAnno(s), mr=reqMancanti(s).length;
+      ${Y.map(s=>{const r=R.find(x=>x.s===s), o=oreAnno(s), mr=reqMancanti(s).length;
         return `<tr class="click ${s.id===st.sel?"sel":""}" data-action="sel-stud" data-sid="${s.id}" tabindex="0">
         <td class="who"><b>${esc(s.n)}</b><small class="num">${esc(s.m||"matricola —")}</small></td>
         <td>${mr ? `<span class="chip bad">${mr===3?"Da verificare":`Manca${mr>1?"no":""} ${mr}`}</span>` : `<span class="chip ok">Completi</span>`}</td>
         <td class="num">${fmtMedia(s)}</td><td>${esc(s.com||"—")}</td>
-        <td><div class="chips">${s.hist.map(([a])=>chip(a)).join("")||'<span class="muted">—</span>'}</div>${s.hist.length?`<small class="muted num">${l.P} pesanti · ${l.L} leggeri</small>`:""}</td>
+        <td><div class="chips">${s.hist.map(([a])=>chip(a)).join("")||'<span class="muted">—</span>'}</div>${s.hist.length?`<small class="muted num">livelli ${livelli(s)}</small>`:""}</td>
         <td>${r?.w?chip(r.w.a):'<span class="muted">—</span>'}</td>
         <td class="num">${oreTxt(s)}<br><span class="chip ${o.c}">${o.txt}</span></td></tr>`}).join("")}
       </tbody></table></div>
@@ -744,7 +780,7 @@ C.studenti = () => {
   </div>`;
 };
 function studDetail(sid, coord){
-  const s = student(sid), r = mine(sid) || {rank:"—"}, l = load(s), sm = summary(sid), o = oreAnno(s), lab = ANNI[s.anno].label;
+  const s = student(sid), r = mine(sid) || {rank:"—"}, sm = summary(sid), o = oreAnno(s), lab = ANNI[s.anno].label;
   const missA = AREAS.filter(a=>!s.hist.some(h=>h[0]===a)), missH = Object.keys(H).filter(h=>!s.hist.some(x=>x[1]===h));
   return `<div class="card detail">
     <div class="card-h" style="margin:0;align-items:flex-start"><div><p class="label">Percorso di tirocinio</p><h2 style="margin-top:2px">${esc(s.n)}</h2><p class="muted num small">${lab} · ${esc(s.m||"matricola —")} · media ${fmtMedia(s)}${s.media!=null?"/30":""}</p></div>
@@ -756,7 +792,8 @@ function studDetail(sid, coord){
     </fieldset>
     <dl class="kv">
       <dt>Domicilio</dt><dd>${esc(s.com||"Non indicato")}</dd>
-      <dt>Carico svolto</dt><dd class="num">${l.P} pesanti · ${l.L} leggeri</dd>
+      <dt>Livelli svolti</dt><dd class="num">${livelli(s)}</dd>
+      <dt>Esperienze nel triennio</dt><dd class="num">${esperienze(s)}</dd>
       <dt>Ordine di scelta</dt><dd class="num">${s.erasmus?"In Erasmus":r.blocked||!r.rank||r.rank==="—"?"—":`${r.rank}° su ${S.filter(x=>x.anno===s.anno&&!x.erasmus&&reqOk(x)).length}`}</dd>
       <dt>Preferenze</dt><dd>${s.pref.length ? s.pref.map((p,i)=>`${i+1}. ${esc(prefName(p))}`).join("<br>") : "Nessuna indicata"}${s.noCar?"<br>Senza auto, usa i mezzi pubblici":""}${s.note?`<br><span class="muted">“${esc(s.note)}”</span>`:""}</dd>
       <dt>Ore nell'anno</dt><dd class="num">${oreTxt(s)} · ${o.txt}</dd>
@@ -786,7 +823,7 @@ function studForm(){
     </div>
     <div class="field"><span class="flabel">Tirocini già svolti</span>
       ${e.hist.map(([a,h],k)=>`<div class="hrow">
-        <select data-h="a" aria-label="Reparto ${k+1}">${opt(Object.keys(TYPE).map(x=>[x,x]),a)}</select>
+        <select data-h="a" aria-label="Reparto ${k+1}">${opt(Object.keys(LIV).map(x=>[x,x]),a)}</select>
         <select data-h="h" aria-label="Ospedale ${k+1}">${opt(Object.entries(H).map(([id,o])=>[id,o.n]),h)}</select>
         <button type="button" class="icon-btn" data-action="del-hist" data-k="${k}" aria-label="Rimuovi tirocinio ${k+1}">×</button></div>`).join("")}
       <div><button type="button" class="btn ghost sm" data-action="add-hist">+ Aggiungi tirocinio</button></div>
@@ -820,12 +857,44 @@ C.reparti = () => { const ok = assignment().filter(r=>r.w);
     <div class="card-h"><div><h2>${h.f}</h2><p class="muted small">${h.city} · ${WARDS.filter(w=>w.h===id).length} reparti</p></div><span class="muted num small">${ok.filter(r=>r.w.h===id).length} studenti assegnati</span></div>
     <div class="tbl-wrap"><table><thead><tr><th>Reparto</th><th>Tipo</th><th>Tutor</th><th title="Ogni Guida segue al massimo 2 studenti">Guide</th><th>Posti</th><th>Assegnati · ${ANNI[st.anno].label}</th></tr></thead><tbody>
     ${WARDS.filter(w=>w.h===id).map(w=>{const who = ok.filter(r=>r.w.id===w.id);
-      return `<tr><td><b style="font-weight:600">${w.a}</b></td><td>${TYPE[w.a]==="P"?'<span class="chip P">Pesante</span>':'<span class="chip L">Leggero</span>'}</td>
+      return `<tr><td><b style="font-weight:600">${w.a}</b></td><td>${livChip(w.a)}</td>
       <td class="muted">${w.tutor}</td><td class="num">${w.posti/2}</td>
       <td><div class="cap" aria-label="${who.length} su ${w.posti} posti">${Array.from({length:Math.max(w.posti,who.length)},(_,k)=>`<i class="${k<who.length?"on":""}"></i>`).join("")}</div></td>
       <td>${who.map(r=>esc(r.s.n)).join(", ")||'<span class="muted">—</span>'}</td></tr>`}).join("")}
     </tbody></table></div></div>`).join(""); };
 
+C.calendario = () => {
+  const tot = PERIODI.length, problemi = PERIODI.filter(p=>controlliPeriodo(p).length).length;
+  const dateIn = (attr,id,k,v,label) => `<input type="date" ${attr}="${id}:${k}" value="${v}" aria-label="${label}" class="date-in">`;
+  const fmtW = p => p.dal && p.al && p.al>=p.dal ? `${settimane(p).toFixed(1).replace(".",",")} sett.` : "—";
+  return `<div class="card"><div class="card-h"><div><h2>Calendario dei tirocini · a.a. 2026/27</h2>
+      <p class="muted small">Date di esempio, da confermare. Ogni periodo è un'esperienza in un reparto diverso.</p></div>
+      <div class="chips"><span class="chip ${tot>=5&&tot<=6?"ok":"bad"}">${tot} esperienze nel triennio · consigliate 5–6</span>${problemi?`<span class="chip bad">${problemi} periodi da correggere</span>`:`<span class="chip ok">Tutti i periodi sono regolari</span>`}</div></div>
+    <ol class="steps"><li><span><b>Durata</b>Ogni esperienza dura da 4 a 6 settimane continuative.</span></li>
+      <li><span><b>Mai durante gli esami</b>I periodi non devono sovrapporsi alle sessioni d'esame.</span></li>
+      <li><span><b>Complessità crescente</b>I anno reparti di livello 1, II anno fino al 2, III anno fino all'area critica (livello 3).</span></li></ol>
+  </div>
+  <div class="cal-grid">
+  ${Object.entries(ANNI).map(([k,a])=>{const ps = PERIODI.filter(p=>p.anno===+k).sort((x,y)=>(x.dal||"9").localeCompare(y.dal||"9"));
+    return `<div class="card"><div class="card-h"><h2>${a.label}</h2><span class="muted small">${ps.length} periodi · reparti fino al livello ${k}</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>Periodo</th><th>Dal</th><th>Al</th><th>Durata</th><th>Controlli</th><th></th></tr></thead><tbody>
+      ${ps.map((p,i)=>{const c = controlliPeriodo(p), inCorso = p.dal<=TODAY && TODAY<=p.al;
+        return `<tr><td><b>${i+1}°</b>${inCorso?' <span class="chip good">in corso</span>':""}</td>
+          <td>${dateIn("data-per",p.id,"dal",p.dal,`Inizio periodo ${i+1}, ${a.label}`)}</td><td>${dateIn("data-per",p.id,"al",p.al,`Fine periodo ${i+1}, ${a.label}`)}</td>
+          <td class="num">${fmtW(p)}</td>
+          <td><div class="chips">${c.length?c.map(t=>`<span class="chip bad">${t}</span>`).join(""):'<span class="chip ok">Regolare</span>'}</div></td>
+          <td><button class="icon-btn" data-action="del-per" data-id="${p.id}" aria-label="Rimuovi periodo ${i+1} del ${a.label}">×</button></td></tr>`}).join("") || `<tr><td colspan="6" class="muted">Nessun periodo.</td></tr>`}
+      </tbody></table></div>
+      <div style="margin-top:10px"><button class="btn ghost sm" data-action="add-per" data-anno="${k}">+ Aggiungi periodo</button></div></div>`}).join("")}
+  <div class="card"><div class="card-h"><h2>Sessioni d'esame</h2><span class="muted small">I tirocini non possono sovrapporsi</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Sessione</th><th>Dal</th><th>Al</th><th></th></tr></thead><tbody>
+    ${SESSIONI.map(e=>`<tr><td><input data-ses="${e.id}:nome" value="${esc(e.nome)}" aria-label="Nome sessione" class="date-in" style="min-width:170px"></td>
+      <td>${dateIn("data-ses",e.id,"dal",e.dal,`Inizio ${e.nome}`)}</td><td>${dateIn("data-ses",e.id,"al",e.al,`Fine ${e.nome}`)}</td>
+      <td><button class="icon-btn" data-action="del-ses" data-id="${e.id}" aria-label="Rimuovi ${esc(e.nome)}">×</button></td></tr>`).join("")}
+    </tbody></table></div>
+    <div style="margin-top:10px"><button class="btn ghost sm" data-action="add-ses">+ Aggiungi sessione</button></div></div>
+  </div>`;
+};
 function monteOre(){
   const Y = SY(), monte = ANNI[st.anno].monte;
   const n = k => Y.filter(s=>oreAnno(s).k===k).length;
@@ -955,7 +1024,7 @@ P.home = () => {
   return `<div class="grid2">
     <div class="card hero">
       <p class="label">Il tuo reparto, ${PERIODO}</p>
-      <div><div class="ward">${esc(r.w.a)}</div><p class="muted">${esc(H[r.w.h].n)} · ${TYPE[r.w.a]==="P"?"reparto pesante":"reparto leggero"}</p></div>
+      <div><div class="ward">${esc(r.w.a)}</div><p class="muted">${esc(H[r.w.h].n)} · ${LIV_TXT[LIV[r.w.a]].toLowerCase()}</p></div>
       <dl class="kv"><dt>Turno</dt><dd>07:00 – 14:00, lunedì–venerdì</dd><dt>Tutor</dt><dd>${esc(r.w.tutor)}</dd><dt>Distanza</dt><dd class="num">${r.f.d==null?"Domicilio non indicato":`${r.f.d} km da ${esc(s.com)}`}</dd><dt>Graduatoria</dt><dd class="num">${r.rank}ª su ${S.filter(x=>x.anno===s.anno&&!x.erasmus).length}</dd></dl>
       <div class="why"><b>Perché ti è stato assegnato</b><div class="chips">${reasons(r.f)}</div></div>
     </div>
@@ -1004,7 +1073,8 @@ P.percorso = () => {
   return `<div class="grid2">${studDetail(st.me,false)}
     <div class="card"><h2 style="margin-bottom:14px">Riepilogo</h2>
       <dl class="kv">
-        <dt>Reparti svolti</dt><dd class="num">${s.hist.length + 1} su ${AREAS.length} disponibili</dd>
+        <dt>Esperienze nel triennio</dt><dd class="num">${esperienze(s)}</dd>
+        <dt>Prossimi periodi</dt><dd class="num">${PERIODI.filter(p=>p.anno===s.anno && p.dal>TODAY).map(p=>`${fmtDay(p.dal,{day:"numeric",month:"short"})} – ${fmtDay(p.al,{day:"numeric",month:"short"})}`).join("<br>") || "—"}</dd>
         <dt>Ospedali visti</dt><dd class="num">${new Set([...s.hist.map(h=>h[1]), mine(st.me)?.w?.h].filter(Boolean)).size} su ${Object.keys(H).length}</dd>
         <dt>Turni nel periodo</dt><dd class="num">${summary(st.me).giorni} su ${DAYS.length}</dd>
       </dl>
@@ -1090,7 +1160,7 @@ function render(){
     : `<span class="avatar" aria-hidden="true">${esc(student(st.me).n.split(" ").map(x=>x[0]).join("").slice(0,2))}</span><span><b>${esc(student(st.me).n)}</b><br>Studente · ${ANNI[student(st.me).anno].label}</span>${exit}`;
   const annoVista = st.role==="coord" ? st.anno : student(st.me).anno;
   $("period").textContent = `${ANNI[annoVista].label} · Periodo 1 · ${PERIODO}`;
-  $("anni").hidden = st.role!=="coord";
+  $("anni").hidden = st.role!=="coord" || st.view==="calendario";   // il calendario mostra tutti e tre gli anni
   $("anni").innerHTML = Object.entries(ANNI).map(([k,a])=>`<button data-action="anno" data-v="${k}" aria-pressed="${+k===st.anno}">${a.label} <span class="num">${S.filter(s=>s.anno===+k).length}</span></button>`).join("");
   $("eyebrow").innerHTML = `${st.role==="coord" ? "Area coordinatore" : "Area studente"} <span aria-hidden="true">/</span> <b>${label}</b>`;
   $("title").textContent = label;
@@ -1111,6 +1181,10 @@ document.addEventListener("click", e => {
   switch (act.dataset.action){
     case "login-as": st.loginAs = act.dataset.as; render(); (document.querySelector("#l-pass,#l-stud"))?.focus(); break;
     case "login-back": st.loginAs = null; render(); break;
+    case "add-per": PERIODI.push({id:"p"+Date.now(), anno:+act.dataset.anno, dal:"", al:""}); render(); break;
+    case "del-per": PERIODI.splice(PERIODI.findIndex(p=>p.id===act.dataset.id),1); render(); toast("Periodo rimosso."); break;
+    case "add-ses": SESSIONI.push({id:"e"+Date.now(), nome:"Nuova sessione", dal:"", al:""}); render(); break;
+    case "del-ses": SESSIONI.splice(SESSIONI.findIndex(e=>e.id===act.dataset.id),1); render(); toast("Sessione rimossa."); break;
     case "req-all-ask": st.confirmReq = true; render(); break;
     case "req-all-no": st.confirmReq = false; render(); break;
     case "req-all": { const L = SY().filter(s=>!s.erasmus && !reqOk(s)); L.forEach(s => REQ.forEach(([k]) => s.req[k] = true)); st.confirmReq = false; render(); toast(`Requisiti segnati come completi per ${L.length} studenti.`); break; }
@@ -1159,6 +1233,7 @@ document.addEventListener("change", e => {
   const t = e.target;
   if (t.name==="method"){ st.method = t.value; render(); }
   else if (t.name==="usaMedia"){ st.W.media = t.checked; render(); }
+  else if (t.dataset.per || t.dataset.ses){ const [id,k] = (t.dataset.per||t.dataset.ses).split(":"); (t.dataset.per?PERIODI:SESSIONI).find(x=>x.id===id)[k] = t.value; render(); }
   else if (t.dataset.req){ const [sid,k] = t.dataset.req.split(":"); student(sid).req[k] = t.checked; render(); }
   else if (t.name?.startsWith("lv-")){ st.W[t.name.slice(3)] = +t.value; render(); }
   else if (t.dataset.ov){
