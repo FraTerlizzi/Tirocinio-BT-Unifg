@@ -44,9 +44,12 @@ a{color:var(--accent)}
 .slim .in{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;min-height:38px}
 .slim .crumbs{font-weight:600;letter-spacing:.02em;text-transform:uppercase}
 .slim .crumbs span{opacity:.7;margin:0 6px}
-.seg{display:flex;gap:2px;background:rgb(255 255 255 / .14);border-radius:6px;padding:2px}
-.seg button{border:0;background:transparent;color:var(--brand-ink);padding:3px 10px;border-radius:4px;font-size:.82rem;font-weight:600;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--surface);color:var(--brand)}
+.login{max-width:860px;margin:24px auto 0;display:flex;flex-direction:column;gap:22px}
+.login-choices{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.login-choices .qcard{padding:26px}
+.login-choices .qcard b{font-size:1.25rem}
+.login-form{max-width:440px;width:100%;margin:24px auto 0;display:flex;flex-direction:column;gap:14px;border-top:3px solid var(--brand)}
+@media (max-width:620px){.login-choices{grid-template-columns:1fr}}
 .head{background:var(--surface)}
 .head .in{display:flex;justify-content:space-between;align-items:center;gap:12px 20px;flex-wrap:wrap;padding-block:18px}
 .brand{display:flex;align-items:center;gap:12px}
@@ -300,7 +303,6 @@ td select,.field input,.field select,.field textarea{padding:8px 10px;border-rad
 
 <div class="slim"><div class="in">
   <span class="crumbs">Corso di Laurea in Infermieristica<span>›</span>Tirocini clinici</span>
-  <div class="seg" role="group" aria-label="Area del portale"><button data-role="stud">Area studente</button><button data-role="coord">Area coordinatore</button></div>
 </div></div>
 <header class="head"><div class="in">
   <div class="brand">
@@ -381,20 +383,22 @@ const S = [
   ["Antonio Zagaria","IN20288",25.6,"Andria",[["Chirurgia Generale","H2"]]],
   ["Roberta Sinigaglia","IN20441",27.2,"Molfetta",[["Medicina Interna","H3"],["Malattie Infettive","H3"]]],
   ["Giuseppe Lacerenza","IN20263",24.5,"Barletta",[["Ortopedia e Traumatologia","H1"],["Urologia","H2"]]]
-].map(([n,m,media,com,hist],i)=>({id:"s"+(i+1),n,m,media,com,hist,anno:2}));
+].map(([n,m,media,com,hist],i)=>({id:"s"+(i+1),n,m,media,com,hist,anno:2,ore:0}));
 // I e III anno: studenti reali da dati.js (media, domicilio e percorso non sono nel registro: si completano da "Studenti")
-(window.STUDENTI_REALI || []).forEach(r => S.push({id:"s"+(S.length+1), media:null, com:null, hist:[], ...r}));
+(window.STUDENTI_REALI || []).forEach(r => S.push({id:"s"+(S.length+1), media:null, com:null, hist:[], ...r, ore:0}));
+// ore = ore pregresse dell'anno, azzerate: i vecchi turni si inseriranno a mano. Le nuove si sommano dalle presenze.
 // shortcut: monte ore del III anno = massimo presente nel registro; II anno non indicato nei file. Da confermare con il coordinatore.
 const ANNI = {1:{label:"I anno", monte:570}, 2:{label:"II anno", monte:null}, 3:{label:"III anno", monte:444}};
 const fmtMedia = s => s.media==null ? "—" : s.media.toFixed(1).replace(".",",");
 const DEFAULT = {merito:70,nuovo:10,osp:3,dist:10,bal:6};
 
-// Calendario del periodo (lun-ven). Data "di oggi" fissa per la demo.
+// Calendario del periodo (lun-ven). Data "di oggi" fissa per la demo: il periodo parte oggi, registro presenze pulito.
 const TODAY = "2026-11-24";
-const DAYS = []; for (let d=new Date(Date.UTC(2026,10,9)); d<=new Date(Date.UTC(2026,11,18)); d.setUTCDate(d.getUTCDate()+1)) { const g=d.getUTCDay(); if (g && g<6) DAYS.push(d.toISOString().slice(0,10)); }
+const DAYS = []; for (let d=new Date(TODAY+"T00:00:00Z"); d<=new Date(Date.UTC(2026,11,18)); d.setUTCDate(d.getUTCDate()+1)) { const g=d.getUTCDay(); if (g && g<6) DAYS.push(d.toISOString().slice(0,10)); }
 const UPTO = DAYS.filter(d=>d<=TODAY), PAST = DAYS.filter(d=>d<TODAY);
 const ORE_TARGET = DAYS.length*7, START = 7*60, TOLL = 10; // turno 07:00-14:00, ritardo oltre 10 minuti
 const fmtDay = (iso,o={weekday:"short",day:"numeric",month:"short"}) => new Date(iso+"T12:00:00Z").toLocaleDateString("it-IT",{...o,timeZone:"UTC"});
+const PERIODO = `${fmtDay(DAYS[0],{day:"numeric",month:"short"})} – ${fmtDay(DAYS.at(-1),{day:"numeric",month:"short",year:"numeric"})}`;
 const hm = m => String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
 const tm = s => +s.slice(0,2)*60 + +s.slice(3,5);
 
@@ -433,7 +437,7 @@ function assign(W, ov={}, anno=st.anno){
 }
 
 // ================= Stato =================
-const st = {role:"coord", view:"panoramica", anno:2, me:"s1", method:"auto", step:1, W:{...DEFAULT}, ov:{}, filter:"all", editRow:null, confirm:false, pub:{},
+const st = {role:null, loginAs:null, loginAnno:1, view:"panoramica", anno:2, me:"s1", method:"auto", step:1, W:{...DEFAULT}, ov:{}, filter:"all", editRow:null, confirm:false, pub:{},
             sel:"s1", editing:null, day:TODAY, open:null, thread:"s4", qrWard:"w1"};
 const assignment = (anno=st.anno) => {
   const R = assign(st.W, st.ov, anno);
@@ -443,26 +447,12 @@ const student = sid => S.find(s=>s.id===sid);
 const mine = sid => assignment(student(sid).anno).find(r=>r.s.id===sid);
 const SY = () => S.filter(s=>s.anno===st.anno);   // studenti dell'anno scelto dal coordinatore
 
-// Presenze di esempio, generate in modo ripetibile
-let seed = 11; const rnd = () => { seed = seed+0x6D2B79F5|0; let t = Math.imul(seed^seed>>>15, 1|seed); t = t+Math.imul(t^t>>>7, 61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
+// Registro presenze: vuoto, si riempie con le timbrature QR o a mano dal coordinatore
 const A = [];
-[1,2,3].flatMap(a => assign(st.W, {}, a)).forEach((r,i) => {
-  const w = r.w?.id;
-  PAST.forEach(d => {
-    if (rnd()<0.05) return;
-    const inn = rnd()<0.07 ? START+TOLL+2+Math.floor(rnd()*15) : START-10+Math.floor(rnd()*16);
-    A.push({sid:r.s.id, d, w, in:hm(inn), out:hm(14*60+Math.floor(rnd()*14)), via:"QR"});
-  });
-  if (i%3) A.push({sid:r.s.id, d:TODAY, w, in:hm(START-9+Math.floor(rnd()*12)), out:null, via:"QR"});
-});
-const dropRec = (sid,d) => { const k = A.findIndex(a=>a.sid===sid&&a.d===d); if (k>=0) A.splice(k,1); };
-dropRec("s4","2026-11-17"); dropRec("s1",TODAY);
-{ const r = A.find(a=>a.sid==="s8"&&a.d==="2026-11-20"); if (r) r.out = null; }
 
 const M = [
   {sid:"s1",from:"c",text:"Ciao Giulia, ricordati di caricare l'attestato del corso sicurezza entro venerdì.",t:"18 nov, 09:40",readC:true,readS:true},
   {sid:"s1",from:"s",tipo:"Documenti",text:"Fatto, l'ho caricato ieri sera. Grazie!",t:"19 nov, 08:15",readC:true,readS:true},
-  {sid:"s4",from:"s",tipo:"Assenza",text:"Buongiorno, il 17 novembre ero assente per malattia. Ho consegnato il certificato in segreteria: serve altro?",t:"23 nov, 16:02",readC:false,readS:true},
   {sid:"s9",from:"s",tipo:"Cambio turno",text:"È possibile fare cambio reparto con un collega dalla prossima settimana? Abbiamo già parlato con i tutor.",t:"24 nov, 07:31",readC:false,readS:true}
 ];
 
@@ -485,16 +475,17 @@ function summary(sid){
   return {giorni:r.length, ore:r.reduce((t,a)=>t+hours(a),0), ritardi:r.filter(isLate).length,
           mancanti:r.filter(a=>!a.out&&a.d<TODAY).length, assenze:student(sid)?.erasmus ? 0 : PAST.filter(d=>!rec(sid,d)).length};
 }
-// Monte ore annuale dal registro (Consensus 2025: debito fino al 10% = ammesso all'esame, oltre = piano di recupero)
+// Monte ore dell'anno = ore pregresse (inserite a mano) + ore timbrate nel registro presenze
+const totOre = s => Math.round(((s.ore||0) + summary(s.id).ore)*10)/10;
 function oreAnno(s){
-  const monte = ANNI[s.anno].monte;
+  const monte = ANNI[s.anno].monte, ore = totOre(s);
   if (s.erasmus) return {txt:`Erasmus ${s.erasmus}`, c:"good", k:"erasmus"};
-  if (s.ore==null || !monte) return {txt:"Non registrate", c:"", k:"nd"};
-  const deb = monte - s.ore;
-  if (deb <= 0) return {txt:"Completato", c:"ok", k:"ok"};
-  if (deb <= monte*0.1) return {txt:`Debito ${deb} h · ammesso`, c:"good", k:"amm"};
-  return {txt:`Debito ${deb} h · recupero`, c:"bad", k:"rec"};
+  if (!ore) return {txt:"Da iniziare", c:"", k:"zero"};
+  if (!monte) return {txt:`${ore} h`, c:"", k:"corso"};
+  if (ore >= monte) return {txt:"Completato", c:"ok", k:"ok"};
+  return {txt:`In corso · ${Math.round(ore/monte*100)}%`, c:"good", k:"corso"};
 }
+const oreTxt = s => `${totOre(s)}${ANNI[s.anno].monte ? ` / ${ANNI[s.anno].monte}` : ""} h`;
 function reasons(f){
   return [
     f.done ? `<span class="chip bad">Reparto già svolto</span>` : `<span class="chip good">Reparto nuovo</span>`,
@@ -542,13 +533,12 @@ C.panoramica = () => {
     ...ok.filter(r=>r.f.d>30).map(r=>`<b>${esc(r.s.n)}</b>: reparto a ${r.f.d} km da casa (${esc(r.s.com)} → ${esc(H[r.w.h].n)}).`),
     ...R.filter(r=>!r.w).map(r=>`<b>${esc(r.s.n)}</b> non ha un reparto: aumentare i posti o assegnare a mano.`),
     ...A.filter(a=>!a.out&&a.d<TODAY&&ids.has(a.sid)).map(a=>`<b>${esc(student(a.sid)?.n)}</b> non ha registrato l'uscita il ${fmtDay(a.d)}.`),
-    ...attivi.filter(s=>!rec(s.id,lastDay)).map(s=>`<b>${esc(s.n)}</b> assente ${fmtDay(lastDay)}.`),
-    ...Y.filter(s=>oreAnno(s).k==="rec").map(s=>`<b>${esc(s.n)}</b>: ${oreAnno(s).txt.toLowerCase()} (oltre il 10% del monte ore annuale).`)
+    ...(lastDay ? attivi.filter(s=>!rec(s.id,lastDay)).map(s=>`<b>${esc(s.n)}</b> assente ${fmtDay(lastDay)}.`) : [])
   ];
   const nonArrivati = attivi.filter(s=>!rec(s.id,TODAY));
   return `
   <section class="hero-band">
-    <div><h2>Buongiorno, coordinatrice</h2><p>${ANNI[st.anno].label}: ${Y.length} studenti${Y.length-attivi.length?`, di cui ${Y.length-attivi.length} in Erasmus`:""}. Periodo dal 9 novembre al 18 dicembre 2026 in ${WARDS.length} reparti tra Barletta, Andria e Bisceglie. Oggi ${oggi.length} su ${attivi.length} hanno già timbrato l'entrata.</p></div>
+    <div><h2>Buongiorno, Michele</h2><p>${ANNI[st.anno].label}: ${Y.length} studenti${Y.length-attivi.length?`, di cui ${Y.length-attivi.length} in Erasmus`:""}. Periodo ${PERIODO} in ${WARDS.length} reparti tra Barletta, Andria e Bisceglie. Oggi ${oggi.length} su ${attivi.length} hanno già timbrato l'entrata.</p></div>
     <div class="btn-row"><button class="btn" data-go="assegnazione">Vai all'assegnazione</button><button class="btn ghost" data-go="presenze">Presenze di oggi</button></div>
   </section>
   ${quick([["assegnazione","sliders","Assegnazione reparti","Automatica o manuale, in 3 passi."],["presenze","qr","Presenze tirocinio","Registro con entrate e uscite via QR."],
@@ -706,7 +696,7 @@ C.studenti = () => {
         <td class="num">${fmtMedia(s)}</td><td>${esc(s.com||"—")}</td>
         <td><div class="chips">${s.hist.map(([a])=>chip(a)).join("")||'<span class="muted">—</span>'}</div>${s.hist.length?`<small class="muted num">${l.P} pesanti · ${l.L} leggeri</small>`:""}</td>
         <td>${r?.w?chip(r.w.a):'<span class="muted">—</span>'}</td>
-        <td class="num">${s.ore!=null?`${s.ore}${ANNI[s.anno].monte?` / ${ANNI[s.anno].monte}`:""} h<br>`:""}<span class="chip ${o.c}">${o.txt}</span></td></tr>`}).join("")}
+        <td class="num">${oreTxt(s)}<br><span class="chip ${o.c}">${o.txt}</span></td></tr>`}).join("")}
       </tbody></table></div>
     </div>
     ${st.editing ? studForm() : studDetail(st.sel, true)}
@@ -723,7 +713,7 @@ function studDetail(sid, coord){
       <dt>Domicilio</dt><dd>${esc(s.com||"Non indicato")}</dd>
       <dt>Carico svolto</dt><dd class="num">${l.P} pesanti · ${l.L} leggeri</dd>
       <dt>Graduatoria</dt><dd class="num">${s.erasmus?"In Erasmus":`${r.rank}ª su ${S.filter(x=>x.anno===s.anno&&!x.erasmus).length}`}</dd>
-      <dt>Ore nell'anno</dt><dd class="num">${s.ore!=null?`${s.ore}${ANNI[s.anno].monte?` su ${ANNI[s.anno].monte}`:""} h · `:""}${o.txt}</dd>
+      <dt>Ore nell'anno</dt><dd class="num">${oreTxt(s)} · ${o.txt}</dd>
       <dt>Presenze periodo</dt><dd class="num">${sm.giorni} turni · ${Math.round(sm.ore)} h su ${ORE_TARGET} h</dd>
     </dl>
     <ol class="timeline">
@@ -792,12 +782,12 @@ C.reparti = () => { const ok = assignment().filter(r=>r.w);
 
 function monteOre(){
   const Y = SY(), monte = ANNI[st.anno].monte;
-  if (!monte) return `<div class="card"><h2>Monte ore annuale</h2><p class="muted small" style="margin-top:6px">Per il ${ANNI[st.anno].label} il registro delle ore non è ancora stato caricato.</p></div>`;
   const n = k => Y.filter(s=>oreAnno(s).k===k).length;
-  return `<div class="card"><div class="card-h"><div><h2>Monte ore annuale · ${ANNI[st.anno].label}</h2><p class="muted small">Dal registro ufficiale delle ore. Monte ore ${monte} h; una settimana = 42 h.</p></div></div>
+  return `<div class="card"><div class="card-h"><div><h2>Monte ore annuale · ${ANNI[st.anno].label}</h2>
+    <p class="muted small">${monte?`Obiettivo ${monte} h. `:"Monte ore del II anno da definire. "}Le ore partono da zero e si sommano dalle presenze; i turni passati si potranno inserire a mano. A fine anno: debito fino al 10% = ammesso all'esame, oltre = piano di recupero.</p></div></div>
     <div class="tiles">
-      ${[[n("ok"),"Completato",`${monte} h o più`],[n("amm"),"Debito fino al 10%",`ammessi all'esame, recupero entro il III anno`],
-         [n("rec"),"Debito oltre il 10%","serve un piano di recupero"],[n("erasmus")+n("nd"),"Erasmus o non registrate",`${n("erasmus")} Erasmus · ${n("nd")} senza ore`]]
+      ${[[n("zero"),"Da iniziare","nessuna ora registrata"],[n("corso"),"In corso","ore in accumulo"],
+         [n("ok"),"Completato",monte?`${monte} h o più`:"—"],[n("erasmus"),"In Erasmus","ore registrate all'estero"]]
         .map(([v,l,s])=>`<div class="tile"><span class="label">${l}</span><span class="v num">${v}</span><span class="s">${s}</span></div>`).join("")}
     </div></div>`;
 }
@@ -846,7 +836,7 @@ C.presenze = () => {
         <td><b style="font-weight:600">${esc(s.n)}</b></td><td class="num">${sm.giorni}</td><td class="num">${Math.round(sm.ore)} h</td>
         <td style="min-width:120px"><div class="bar wide"><i style="width:${Math.min(100,sm.ore/ORE_TARGET*100)}%"></i></div><small class="muted num">${Math.round(sm.ore/ORE_TARGET*100)}%</small></td>
         <td class="num">${sm.assenze}</td><td class="num">${sm.ritardi}</td>
-        <td class="num">${s.ore!=null?`${s.ore} h `:""}<span class="chip ${o.c}">${o.txt}</span></td></tr>
+        <td class="num">${oreTxt(s)} <span class="chip ${o.c}">${o.txt}</span></td></tr>
         ${open?`<tr><td colspan="7"><div class="chips">${s.erasmus?`<span class="chip good">In Erasmus (${esc(s.erasmus)}): nessuna presenza in questo periodo.</span>`:UPTO.map(d=>{const a=rec(s.id,d),[l,c]=status(a,d);return `<span class="chip ${c}" title="${l}">${fmtDay(d,{day:"numeric",month:"numeric"})} ${a?`${a.in}–${a.out||"?"}`:"assente"}</span>`}).join("")}</div></td></tr>`:""}`}).join("")}
     </tbody></table></div>
   </div>`;
@@ -864,11 +854,11 @@ C.messaggi = () => {
 };
 function chatBox(sid, me){
   const s = student(sid);
-  return `<div class="card-h"><div><h2>${me==="c"?esc(s?.n):"Coordinatrice tirocini"}</h2><p class="muted small">${me==="c"?esc(s?.m)+" · "+esc(wardName(mine(sid)?.w)):"Risposta di solito entro un giorno lavorativo"}</p></div></div>
-    <div class="chat" id="chat">${M.filter(m=>m.sid===sid).map(m=>`<div class="msg ${m.from===me?"me":""}">${m.tipo?`<span class="chip" style="margin-bottom:4px">${esc(m.tipo)}</span><br>`:""}${esc(m.text)}<small>${m.from==="c"?"Coordinatrice":esc(s?.n)} · ${esc(m.t)}</small></div>`).join("")||'<p class="muted small">Nessun messaggio ancora.</p>'}</div>
+  return `<div class="card-h"><div><h2>${me==="c"?esc(s?.n):"Michele Massaro"}</h2><p class="muted small">${me==="c"?esc(s?.m)+" · "+esc(wardName(mine(sid)?.w)):"Risposta di solito entro un giorno lavorativo"}</p></div></div>
+    <div class="chat" id="chat">${M.filter(m=>m.sid===sid).map(m=>`<div class="msg ${m.from===me?"me":""}">${m.tipo?`<span class="chip" style="margin-bottom:4px">${esc(m.tipo)}</span><br>`:""}${esc(m.text)}<small>${m.from==="c"?"M. Massaro":esc(s?.n)} · ${esc(m.t)}</small></div>`).join("")||'<p class="muted small">Nessun messaggio ancora.</p>'}</div>
     <form class="compose" data-form="msg">
       ${me==="s"?`<div class="field"><label for="msg-tipo">Argomento</label><select id="msg-tipo">${["Domanda","Assenza","Cambio turno","Documenti","Altro"].map(x=>`<option>${x}</option>`).join("")}</select></div>`:""}
-      <div class="field"><label for="msg-text">${me==="s"?"Messaggio":"Rispondi"}</label><textarea id="msg-text" maxlength="1000" placeholder="${me==="s"?"Scrivi alla coordinatrice…":"Scrivi una risposta…"}"></textarea></div>
+      <div class="field"><label for="msg-text">${me==="s"?"Messaggio":"Rispondi"}</label><textarea id="msg-text" maxlength="1000" placeholder="${me==="s"?"Scrivi al coordinatore…":"Scrivi una risposta…"}"></textarea></div>
       <div class="btn-row"><button class="btn" type="submit">Invia</button></div>
     </form>`;
 }
@@ -910,11 +900,11 @@ function calendar(sid){
 P.home = () => {
   const s = student(st.me), r = mine(st.me), sm = summary(st.me), a = rec(st.me,TODAY);
   if (s.erasmus) return `<div class="card hero"><p class="label">${ANNI[s.anno].label}</p><div class="ward">Erasmus · ${esc(s.erasmus)}</div><p class="muted">In questo periodo sei in mobilità Erasmus: il tirocinio e le ore si registrano con l'università ospitante.</p></div>`;
-  if (!r?.w) return `<div class="card"><h2>In attesa di assegnazione</h2><p class="muted" style="margin-top:6px">La coordinatrice non ha ancora pubblicato il tuo reparto per questo periodo.</p></div>`;
+  if (!r?.w) return `<div class="card"><h2>In attesa di assegnazione</h2><p class="muted" style="margin-top:6px">Il coordinatore non ha ancora pubblicato il tuo reparto per questo periodo.</p></div>`;
   const o = oreAnno(s);
   return `<div class="grid2">
     <div class="card hero">
-      <p class="label">Il tuo reparto, 9 nov – 18 dic 2026</p>
+      <p class="label">Il tuo reparto, ${PERIODO}</p>
       <div><div class="ward">${esc(r.w.a)}</div><p class="muted">${esc(H[r.w.h].n)} · ${TYPE[r.w.a]==="P"?"reparto pesante":"reparto leggero"}</p></div>
       <dl class="kv"><dt>Turno</dt><dd>07:00 – 14:00, lunedì–venerdì</dd><dt>Tutor</dt><dd>${esc(r.w.tutor)}</dd><dt>Distanza</dt><dd class="num">${r.f.d==null?"Domicilio non indicato":`${r.f.d} km da ${esc(s.com)}`}</dd><dt>Graduatoria</dt><dd class="num">${r.rank}ª su ${S.filter(x=>x.anno===s.anno&&!x.erasmus).length}</dd></dl>
       <div class="why"><b>Perché ti è stato assegnato</b><div class="chips">${reasons(r.f)}</div></div>
@@ -926,11 +916,11 @@ P.home = () => {
       <div class="card"><div class="card-h"><h2>Ore di tirocinio</h2><span class="num score">${Math.round(sm.ore)} / ${ORE_TARGET} h</span></div>
         <div class="bar wide"><i style="width:${Math.min(100,sm.ore/ORE_TARGET*100)}%"></i></div>
         <p class="muted small num" style="margin-top:8px">${sm.giorni} turni svolti · ${sm.assenze} assenze · ${sm.ritardi} ritardi</p>
-        ${s.ore!=null?`<p class="small num" style="margin-top:8px">Nell'anno: <b>${s.ore}${ANNI[s.anno].monte?` / ${ANNI[s.anno].monte}`:""} h</b> <span class="chip ${o.c}">${o.txt}</span></p>`:""}</div>
+        <p class="small num" style="margin-top:8px">Nell'anno: <b>${oreTxt(s)}</b> <span class="chip ${o.c}">${o.txt}</span></p></div>
     </div>
   </div>
   ${quick([["presenze","qr","Presenze tirocinio","Timbra entrata e uscita con il QR del reparto."],["percorso","route","Il mio percorso","Reparti fatti e quelli che ti mancano."],
-           ["messaggi","chat","Scrivi alla coordinatrice","Assenze, cambi turno, documenti."],["home","home","I miei turni","Calendario del periodo qui sotto."]])}
+           ["messaggi","chat","Scrivi al coordinatore","Assenze, cambi turno, documenti."],["home","home","I miei turni","Calendario del periodo qui sotto."]])}
   <div class="card"><div class="card-h"><h2>I miei turni del periodo</h2></div>${calendar(st.me)}</div>`;
 };
 P.percorso = () => {
@@ -942,7 +932,7 @@ P.percorso = () => {
         <dt>Ospedali visti</dt><dd class="num">${new Set([...s.hist.map(h=>h[1]), mine(st.me)?.w?.h].filter(Boolean)).size} su ${Object.keys(H).length}</dd>
         <dt>Turni nel periodo</dt><dd class="num">${summary(st.me).giorni} su ${DAYS.length}</dd>
       </dl>
-      <p class="muted small" style="margin-top:14px">Il conteggio include il reparto in corso. Per correggere un tirocinio passato scrivi alla coordinatrice dalla sezione Messaggi.</p>
+      <p class="muted small" style="margin-top:14px">Il conteggio include il reparto in corso. Per correggere un tirocinio passato scrivi al coordinatore dalla sezione Messaggi.</p>
     </div></div>`;
 };
 P.presenze = () => {
@@ -960,7 +950,7 @@ P.presenze = () => {
       <div class="bar wide"><i style="width:${Math.min(100,sm.ore/ORE_TARGET*100)}%"></i></div>
       <div style="margin-top:16px">${calendar(st.me)}</div></div>
   </div>
-  <div class="card"><div class="card-h"><h2>Registro presenze</h2><span class="muted small">Per correggere un errore scrivi alla coordinatrice</span></div>
+  <div class="card"><div class="card-h"><h2>Registro presenze</h2><span class="muted small">Per correggere un errore scrivi al coordinatore</span></div>
     <div class="tbl-wrap"><table><thead><tr><th>Giorno</th><th>Entrata</th><th>Uscita</th><th>Ore</th><th>Stato</th></tr></thead><tbody>
     ${UPTO.slice().reverse().map(d=>{const x=rec(st.me,d),[l,c]=status(x,d);
       return `<tr><td>${fmtDay(d)}</td><td class="num">${x?x.in:"—"}</td><td class="num">${x?.out||"—"}</td><td class="num">${x?.out?hours(x).toFixed(1):"—"}</td><td><span class="chip ${c}">${l}</span></td></tr>`}).join("")}
@@ -968,19 +958,62 @@ P.presenze = () => {
 };
 P.messaggi = () => { M.filter(m=>m.sid===st.me&&m.from==="c").forEach(m=>m.readS=true); return `<div class="card" style="max-width:760px">${chatBox(st.me,"s")}</div>`; };
 
+// ================= Accesso =================
+// shortcut: accesso solo dimostrativo, la password non viene verificata. Il metodo vero (SSO d'ateneo, SPID…) è da decidere.
+const COORD = {user:"michele.massaro", n:"Michele Massaro"};
+function loginView(){
+  const icon = ic => `<span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[ic]}</svg></span>`;
+  const note = `<p class="muted small">Accesso dimostrativo: la password non viene ancora verificata. Il sistema di accesso definitivo è da decidere.</p>`;
+  if (!st.loginAs) return `<div class="login">
+    <div><h1>Accedi al portale tirocini</h1><p class="muted" style="margin-top:6px">Corso di Laurea in Infermieristica · ospedali di Barletta, Andria e Bisceglie. Scegli il tuo profilo.</p></div>
+    <div class="login-choices">
+      <button class="qcard" data-action="login-as" data-as="coord">${icon("sliders")}<b>Coordinatore</b><span>Assegnazione dei reparti, studenti, presenze e messaggi per tutti e tre gli anni.</span><em>Accedi come coordinatore →</em></button>
+      <button class="qcard" data-action="login-as" data-as="stud">${icon("people")}<b>Studente</b><span>Il tuo reparto, la timbratura con il QR, le tue ore e i messaggi al coordinatore.</span><em>Accedi come studente →</em></button>
+    </div></div>`;
+  const back = `<button type="button" class="linkbtn" data-action="login-back">← Cambia profilo</button>`;
+  if (st.loginAs==="coord") return `<form class="card login-form" data-form="login" novalidate>
+    ${back}<div><p class="label">Area coordinatore</p><h2>Accesso coordinatore</h2></div>
+    <div class="field"><label for="l-user">Nome utente</label><input id="l-user" value="${COORD.user}" autocomplete="off"></div>
+    <div class="field"><label for="l-pass">Password</label><input id="l-pass" type="password" autocomplete="off"></div>
+    <p class="err" id="l-err" hidden></p>
+    <button class="btn wide" type="submit">Accedi</button>${note}</form>`;
+  const anno = st.loginAnno;
+  return `<form class="card login-form" data-form="login" novalidate>
+    ${back}<div><p class="label">Area studente</p><h2>Accesso studente</h2></div>
+    <div class="field"><label for="l-anno">Anno di corso</label><select id="l-anno">${Object.entries(ANNI).map(([k,a])=>`<option value="${k}" ${+k===anno?"selected":""}>${a.label}</option>`).join("")}</select></div>
+    <div class="field"><label for="l-stud">Studente</label><select id="l-stud"><option value="">Scegli il tuo nome…</option>${S.filter(s=>s.anno===anno).sort((a,b)=>a.n.localeCompare(b.n)).map(s=>`<option value="${s.id}">${esc(s.n)}${s.m?` · ${esc(s.m)}`:""}</option>`).join("")}</select></div>
+    <div class="field"><label for="l-pass">Password</label><input id="l-pass" type="password" autocomplete="off"></div>
+    <p class="err" id="l-err" hidden></p>
+    <button class="btn wide" type="submit">Accedi</button>${note}</form>`;
+}
+function doLogin(){
+  const err = t => { $("l-err").textContent = t; $("l-err").hidden = false; };
+  if (st.loginAs==="coord"){
+    if ($("l-user").value.trim().toLowerCase() !== COORD.user) return err(`Nome utente non riconosciuto. Per la demo usa ${COORD.user}.`);
+  } else if (!$("l-stud").value) return err("Scegli il tuo nome dall'elenco.");
+  if (!$("l-pass").value) return err("Inserisci la password.");
+  if (st.loginAs==="stud") st.me = $("l-stud").value;
+  st.role = st.loginAs; st.view = NAV[st.role][0][0]; st.editing = null;
+  render(); scrollTo({top:0});
+  toast(st.role==="coord" ? `Benvenuto, ${COORD.n}.` : `Ciao ${student(st.me).n}, accesso effettuato.`);
+}
+
 // ================= Render =================
 function render(){
+  const out = !st.role;
+  document.querySelector(".navbar").hidden = out; document.querySelector("header.top").hidden = out;
+  if (out){ $("who").innerHTML = ""; $("view").innerHTML = loginView(); return; }
   const views = st.role==="coord" ? C : P, nav = NAV[st.role];
   if (!views[st.view]) st.view = nav[0][0];
   const html = views[st.view]();              // la vista segna i messaggi come letti: va calcolata prima dei badge
   const label = nav.find(n=>n[0]===st.view)[1];
-  document.querySelectorAll("[data-role]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.role===st.role));
   $("nav").innerHTML = nav.map(([id,l])=>`<button data-go="${id}" ${id===st.view?'aria-current="page"':""}>${l}${id==="messaggi"&&unread()?`<span class="badge">${unread()}</span>`:""}</button>`).join("");
+  const exit = `<button class="btn ghost sm" data-action="logout">Esci</button>`;
   $("who").innerHTML = st.role==="coord"
-    ? `<span class="avatar" aria-hidden="true">CT</span><span><b>Coordinatrice tirocini</b><br>Ufficio Tirocini · a.a. 2026/27</span>`
-    : `<span class="avatar" aria-hidden="true">${esc(student(st.me).n.split(" ").map(x=>x[0]).join("").slice(0,2))}</span><label for="login" class="muted">Accesso demo come</label><select id="login">${Object.entries(ANNI).map(([k,a])=>`<optgroup label="${a.label}">${S.filter(s=>s.anno===+k).map(s=>`<option value="${s.id}" ${s.id===st.me?"selected":""}>${esc(s.n)}</option>`).join("")}</optgroup>`).join("")}</select>`;
+    ? `<span class="avatar" aria-hidden="true">MM</span><span><b>${COORD.n}</b><br>Coordinatore tirocini · a.a. 2026/27</span>${exit}`
+    : `<span class="avatar" aria-hidden="true">${esc(student(st.me).n.split(" ").map(x=>x[0]).join("").slice(0,2))}</span><span><b>${esc(student(st.me).n)}</b><br>Studente · ${ANNI[student(st.me).anno].label}</span>${exit}`;
   const annoVista = st.role==="coord" ? st.anno : student(st.me).anno;
-  $("period").textContent = `${ANNI[annoVista].label} · Periodo 1 · 9 nov – 18 dic 2026`;
+  $("period").textContent = `${ANNI[annoVista].label} · Periodo 1 · ${PERIODO}`;
   $("anni").hidden = st.role!=="coord";
   $("anni").innerHTML = Object.entries(ANNI).map(([k,a])=>`<button data-action="anno" data-v="${k}" aria-pressed="${+k===st.anno}">${a.label} <span class="num">${S.filter(s=>s.anno===+k).length}</span></button>`).join("");
   $("eyebrow").innerHTML = `${st.role==="coord" ? "Area coordinatore" : "Area studente"} <span aria-hidden="true">/</span> <b>${label}</b>`;
@@ -995,12 +1028,14 @@ function render(){
 
 // ================= Eventi =================
 document.addEventListener("click", e => {
-  const go = e.target.closest("[data-go]"), role = e.target.closest("[data-role]"), act = e.target.closest("[data-action]");
+  const go = e.target.closest("[data-go]"), act = e.target.closest("[data-action]");
   if (go){ st.view = go.dataset.go; render(); scrollTo({top:0}); return; }
-  if (role){ st.role = role.dataset.role; st.view = NAV[st.role][0][0]; st.editing = null; render(); return; }
   if (!act) return;
   const sid = act.dataset.sid;
   switch (act.dataset.action){
+    case "login-as": st.loginAs = act.dataset.as; render(); (document.querySelector("#l-pass,#l-stud"))?.focus(); break;
+    case "login-back": st.loginAs = null; render(); break;
+    case "logout": st.role = null; st.loginAs = null; render(); scrollTo({top:0}); toast("Sei uscito dal portale."); break;
     case "step": st.step = +act.dataset.n; st.editRow = null; st.confirm = false; render(); scrollTo({top:0}); break;
     case "reset-crit": Object.assign(st.W, DEFAULT); render(); break;
     case "filter": st.filter = act.dataset.v; render(); break;
@@ -1054,19 +1089,20 @@ document.addEventListener("change", e => {
   }
   else if (t.id==="day"){ st.day = t.value; render(); }
   else if (t.id==="qr-ward"){ st.qrWard = t.value; render(); }
-  else if (t.id==="login"){ st.me = t.value; render(); }
+  else if (t.id==="l-anno"){ st.loginAnno = +t.value; render(); $("l-stud").focus(); }
 });
 document.addEventListener("submit", e => {
   e.preventDefault();
   const f = e.target.dataset.form;
   if (f==="stud") saveForm();
+  if (f==="login") doLogin();
   if (f==="msg"){
     const text = $("msg-text").value.trim();
     if (!text){ $("msg-text").focus(); return; }
     const now = new Date(), t = "oggi, " + hm(now.getHours()*60+now.getMinutes());
     if (st.role==="stud") M.push({sid:st.me,from:"s",tipo:$("msg-tipo").value,text,t,readC:false,readS:true});
     else M.push({sid:st.thread,from:"c",text,t,readC:true,readS:false});
-    render(); toast(st.role==="stud" ? "Messaggio inviato alla coordinatrice." : "Risposta inviata.");
+    render(); toast(st.role==="stud" ? "Messaggio inviato al coordinatore." : "Risposta inviata.");
   }
 });
 // QR che si rinnova ogni 30 secondi
